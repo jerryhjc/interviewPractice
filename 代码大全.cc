@@ -1,3 +1,7 @@
+http://www.geeksforgeeks.org/program-for-nth-fibonacci-number/  
+
+
+
 linked list 等号左边的->next 表示指向的意思;  等号右边的->next 表示下一个node的意思;
 
 0跟任何数异或都还是那个数
@@ -22,7 +26,7 @@ void merge(int arr[], int l, int m, int r)
 
     /* Copy data to temp arrays L[] and R[] */
     for (i = 0; i < n1; i++)
-        L[i] = arr[l + i];
+        L[i] = arr[l + i];  // 括号里的l重要
     for (j = 0; j < n2; j++)
         R[j] = arr[m + 1+ j];
 
@@ -192,7 +196,7 @@ int remove(int arr[], int n, int element)
         if(arr[i] == element)
             ++i;
         else
-        {
+        {   
             arr[j] = arr[i]; //  j是removed element的index,  
             ++j;   // ++j 是index 指向下一个元素 ; 所以array length 直接返回 j  
             ++i; 
@@ -318,7 +322,7 @@ vector<vector<int>> threeSum(vector<int>& arr)
     for(int i = 0; i < arr.size() - 2; ++i)
     {
         int j = i+1;
-        int k = arr.end() - 1;
+        int k = arr.size() - 1;
         vector<int> cur; 
 
         while(i > 0 && arr[i] == arr[i-1])   //avoid duplicate for i
@@ -361,28 +365,30 @@ output: sum of the three integers
 
 int threeSum(vector<int>& arr, int target)
 {
-    int ret; 
-    vector<int> cur; 
 
     if(arr.size() <= 2)
-        return ret; 
+        return -1; 
+        // return ret; 
 
     sort(arr.begin(), arr.end());
 
-    int dis = INT_MAX; 
+    int ret; 
+    int dist = INT_MAX; 
     for(int i = 0; i < arr.size() - 2; ++i)
     {
-        while(i > 0 && arr[i] == arr[i-1])   //avoid duplicate 
-            continue; 
+        // while(i > 0 && arr[i] == arr[i-1])   //avoid duplicate 
+        //     continue;     // the problem has assume there is only one solution. 
 
         int j = i+1;
-        int k = arr.end() - 1;
+        int k = arr.size() - 1;
 
-        while(i < k)
+        // while(i < k)
+        while(j < k)
         {
 
             int sum = arr[i] + arr[j] + arr[k];
-            int temp_dist = target - sum;
+            int temp_dist;
+            
             if(arr[i] + arr[j] + arr[k] == target)
             {
                 return target; 
@@ -403,7 +409,7 @@ int threeSum(vector<int>& arr, int target)
             else if(arr[i] + arr[j] + arr[k] > target)
             {
                 temp_dist = (arr[i] + arr[j] + arr[k]) - target;
-                if(temp_dist > dist)
+                if(temp_dist < dist)
                 {
                     dist = temp_dist;
                     ret = sum; 
@@ -1252,7 +1258,7 @@ A subsequence of a string is a new string which is formed from the original stri
 
 solution: We define the computation structure to be C[i][j] indicating the number of solutions for S[0...i-1] and T[0...j-1]. i/j in C represents #chars in the substring. It's easier if we include 0 in the structure to accommodate the case when there's no chars(empty string) considered. In order to expand this structure, when updating C[i][j] we have two options:
 
-1. C[i][j] = C[i-1][j]. No matter what current char of S is we simply don't use it. We will only use chars [0,...i-2] from S no matter how many solutions there are to cover T[0...j-1]
+1. C[i][j] = C[i-1][j]. No matter what current char of S is we simply do not use it. We will only use chars [0,...i-2] from S no matter how many solutions there are to cover T[0...j-1]
 2. But if current char of S is same to current of T (S[i-1]==T[j-1]) then we have another choice: we can use all the solutions of C[i-1][j-1] to increment the solution C[i][j]. Therefore C[i][j] += C[i-1][j-1]
 
 
@@ -2403,7 +2409,10 @@ int minPathSum(vector<vector<int> > &grid)  {
 Unique Binary Search Trees 
 Given n,  how many  structurally  unique  BST (binary search  trees)  that  store values  1...n? 
 
-定义f(n)为unique BST的数量, 找规律n=0, n=1, n=2, n=3. 以n = 3为例：构造的BST的根节点可以取{1, 2, 3} 中的任一数字。 如以1为节点，则left subtree只能有0个节点，而right subtree有2, 3两个节点。所以left/right subtree一共的combination数量为：f(0) * f(2) = 2. 以2为节点， 则left subtree只能为1， right subtree只能为2： f(1) * f(1) = 1. 以3为节点，则left subtree有1, 2两个节点，right subtree有0个节点：f(2)*f(0) = 2
+定义f(n)为unique BST的数量, 找规律n=0, n=1, n=2, n=3. 以n = 3为例：构造的BST的根节点可以取{1, 2, 3} 中的任一数字。 
+如以1为节点，则left subtree只能有0个节点，而right subtree有2, 3两个节点。所以left/right subtree一共的combination数量为：f(0) * f(2) = 2. 
+以2为节点， 则left subtree只能为1， right subtree只能为2： f(1) * f(1) = 1. 以3为节点，则left subtree有1, 2两个节点，right subtree有0个节点：f(2)*f(0) = 2
+
 
 总结规律：
 f(0) = 1
@@ -2789,6 +2798,260 @@ bool isInterleave(string s1, string s2, string s3) {
 }
 
 //////////////////////////////////////
+LRU cache
+
+简单的说，cache的存储是一个链表的话，那么只要保证从头到尾的顺序就是cache从新到旧的顺序就好了，
+对于任何一个节点，如果被访问了，那么就将该节点移至头部。如果cache已满，那么就把尾部的删掉，从头部插入新节点。
+
+
+class LRUCache{
+ public:
+     struct CacheEntry
+     {
+     public:
+         int key;
+         int value;
+         CacheEntry(int k, int v) :key(k), value(v) {}
+     };
+ 
+     LRUCache(int capacity) {
+         m_capacity = capacity;
+     }
+ 
+     int get(int key) {
+         if (m_map.find(key) == m_map.end())
+             return -1;
+ 
+         MoveToHead(key);
+         return m_map[key]->value;
+     }
+ 
+     void set(int key, int value) {
+         if (m_map.find(key) == m_map.end())
+         {
+             CacheEntry newItem(key, value);
+             if (m_LRU_cache.size() >= m_capacity)
+             {
+                 //remove from tail
+                 m_map.erase(m_LRU_cache.back().key);
+                 m_LRU_cache.pop_back();                
+             }
+ 
+             // insert in head.
+             m_LRU_cache.push_front(newItem);
+             m_map[key] = m_LRU_cache.begin();
+             return;
+         }
+ 
+         m_map[key]->value = value;
+         MoveToHead(key);
+     }
+ 
+ private:
+     unordered_map<int, list<CacheEntry>::iterator> m_map;
+     list<CacheEntry> m_LRU_cache;
+     int m_capacity;
+ 
+     void MoveToHead(int key) 
+     {
+         //Move key from current location to head
+         auto updateEntry = *m_map[key];
+         m_LRU_cache.erase(m_map[key]);
+         m_LRU_cache.push_front(updateEntry);
+         m_map[key] = m_LRU_cache.begin();
+     }
+ 
+ };
+
+
+
+/////////////////////////////////////////////  
+combination 
+
+Given two integers n and k, return all possible combination of k numbers out of 1, 2, ..., n. 
+solution: 1. 暴力求解n!循环  2. DFS + backtracking.  注意level的初始值由题目决定
+e.g. n = 3, k=2. output: (1,2), (1,3), (2,3)
+
+
+class Solution
+{
+    public:
+        vector<vector<int>> combine(int n, int k)
+        {
+            vector<vector<int>> ret; 
+
+            // corner case 
+            if(n <= 0)
+                return ret; 
+
+            vector<int> curr; 
+            DFS(ret, curr, n, k, 1);
+            return ret;
+
+        }    
+
+        void DFS(vector<vector<int>>& ret, vector<int> curr, int n, int k, int level)
+        {
+            if(curr.size() == k)
+            {
+                ret.push_back(curr);
+                return; 
+            }
+            if(curr.size() > k)
+                return; 
+
+            for(int i = level; i <=n; ++i)
+            {
+                curr.push_back(i);   // preorder-search
+                DFS(ret, curr, n, k, i+1);  // recursion here 
+                curr.pop_back();   // backtracking
+            }
+
+        }
+
+};
+
+time complexity O(n!)
+
+//////////////////////////////////////////
+Combination sum 
+
+Given a set of candidate number (C) and a target number (T), find all unique combinations in C where 
+the candidate numbers sums to T. The same repeated number may be chosen from C unlimited number of times.
+
+class Solution
+{
+public: 
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    {
+        vector<vector<int>> ret;
+
+        // corner case, 注意target 为负数
+        if(candidates.size() == 0 || target < 0)
+            return ret; 
+
+        vector<int> curr; 
+        sort(candidates.begin(), candidates.end());
+        Backtracking(ret, curr, candidates, target, 0);
+        return ret; 
+
+    }
+
+    void Backtracking(vector<vector<int>>& ret, vector<int> curr, vector<int> candidates, int target, int level)
+    {
+        if(target == 0)
+        {
+            ret.push_back(curr);
+            return; 
+        }
+        else if(target < 0)     // save time
+            return;
+
+        for(int i = level; i < candidates.size(); ++i)
+        {
+
+            target -= candidates[i];
+            curr.push_back(candidates[i]);  // preorder search: DFS
+            Backtracking(ret, curr, candidates, target, i)  // i没加1, different from last problem.
+            curr.pop_back();   // backtracking
+            target += candidates[i];    // add back
+
+        }
+
+    }
+
+};
+
+time complexity O(n!)
+
+///////////////////////////////////////////
+
+Given a set of candidate number (C) and a target number (T), find all unique combinations in C where 
+the candidate numbers sums to T. The same repeated number can not be chosen from C unlimited number of times.
+
+
+class Solution
+{
+public: 
+    vector<vector<int>> combinationSum(vector<int>& candidates, int target)
+    {
+        vector<vector<int>> ret;
+
+        // corner case, 注意target 为负数
+        if(candidates.size() == 0 || target < 0)
+            return ret; 
+
+        vector<int> curr; 
+        sort(candidates.begin(), candidates.end());
+        Backtracking(ret, curr, candidates, target, 0);
+        return ret; 
+
+    }
+
+    void Backtracking(vector<vector<int>>& ret, vector<int> curr, vector<int> candidates, int target, int level)
+    {
+        if(target == 0)
+        {
+            ret.push_back(curr);
+            return; 
+        }
+        else if(target < 0)     // save time
+            return;
+
+        for(int i = level; i < candidates.size(); ++i)
+        {
+
+            target -= candidates[i];
+            curr.push_back(candidates[i]);  // preorder search: DFS
+            Backtracking(ret, curr, candidates, target, i+1)  // i加了1, different from last problem.
+            curr.pop_back();   // backtracking
+            target += candidates[i];    // add back
+
+            while(i < num.size() - 1 && num[i] == num[i+1])   // skip the same number 
+                ++i;
+
+        }
+
+    }
+
+};
+
+
+////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
