@@ -2894,7 +2894,7 @@ class Solution
         {
             if(curr.size() == k)
             {
-                ret.push_back(curr);
+                ret.push_back(curr);    // 需要满足条件才能push back
                 return; 
             }
             if(curr.size() > k)
@@ -2941,7 +2941,7 @@ public:
     {
         if(target == 0)
         {
-            ret.push_back(curr);
+            ret.push_back(curr);     // 需要满足条件才能push back
             return; 
         }
         else if(target < 0)     // save time
@@ -2992,13 +2992,13 @@ public:
     {
         if(target == 0)
         {
-            ret.push_back(curr);
+            ret.push_back(curr);   // 需要满足条件才能push back
             return; 
         }
         else if(target < 0)     // save time
             return;
 
-        for(int i = level; i < candidates.size(); ++i)
+        for(int i = level; i < candidates.size(); ++i)  // i = level 为了让每一次的选择不重头选
         {
 
             target -= candidates[i];
@@ -3018,6 +3018,272 @@ public:
 
 
 ////////////////////////////////////////////////////
+Letter combinations of a phone number 
+
+Given a digital string, return all possible letter combinations that the number could represent. 
+A mapping of digit to letter (like on the telephone buttons) is given. 
+
+input: string "23". output: "ad", "ae", ... "cf"
+
+
+class Solution
+{
+public: 
+    vector<string> letterCombinations(string digits)
+    {
+        vector<string> ret; 
+        vector<string> dictionary;
+
+        string tmp;
+        dictionary.push_back("");
+        dictionary.push_back("");
+        dictionary.push_back("abc");
+        dictionary.push_back("def");
+        dictionary.push_back("ghi");
+        dictionary.push_back("jkl");
+        dictionary.push_back("mno");
+        dictionary.push_back("pqrs");
+        dictionary.push_back("tuv");
+        dictionary.push_back("wxyz");
+
+        combinations(ret, tmp, digits, dictionary, 0);
+        return ret; 
+
+    }
+
+    void combinations(vector<string>& ret, string tmp, string digits, vector<string> dictionary, int level)
+    {
+        if(level == digits.size())
+        {
+            ret.push_back(tmp);   // 需要满足条件才能push back
+            return;
+        }
+
+        int index = dictionary[level] - '0';
+
+        for(int i = 0; i < dictionary[index].size(); ++i)  // here i is initialized to 0
+        {
+            tmp.push_back(dictionary[index][i]);
+            // combinations(ret, tmp, digits, dictionary, i+1);   // wrong
+            combinations(ret, tmp, digits, dictionary, level+1);   // wrong
+            tmp.pop_back();
+        }
+
+    }
+
+};
+
+
+///////////////////////////////////////////////////
+
+subsets
+
+Given a set of distinct integers, S, return all possible subsets. Note: elements in a subsets must be
+in non-descending order.  input: S= [1, 2]  output: [1], [2], [1,2]
+solution: DFS + backtracking; 和combination 区别：输出不是fixed size
+
+
+class Solution
+{
+    public:
+        vector<vector<int>> res;
+
+        vector<vector<int>> subsets(vector<int>& S) 
+        {
+            if(S.empty())
+                return res;
+
+            sort(S.begin(), S.end());
+
+            res.push_back(vector<int>());   // 注意空集
+            vector<int> v; 
+
+            generate(vector<int>& v, vector<int>& S, int start)
+            {
+                if(start == S.size())
+                    return; 
+
+                for(int i = start; i < S.size(); i++)
+                {
+                    v.push_back(S[i]);
+                    res.push_back(v);
+                    generate(v, s, i+1);
+                    v.pop_back();
+                }
+            }
+        }
+
+};
+
+===============================
+
+Given a collection of integers might contain duplicates, S, return all possible subsets. Note: elements in a subsets must be
+in non-descending order.  input: S= [2, 2]  output: [2]
+solution: DFS + backtracking; 和combination 区别：输出不是fixed size
+
+
+class Solution
+{
+    public:
+        vector<vector<int>> res;
+
+        vector<vector<int>> subsets(vector<int>& S) 
+        {
+            if(S.empty())
+                return res;
+
+            sort(S.begin(), S.end());
+
+            res.push_back(vector<int>());   // 注意空集
+            vector<int> v; 
+
+            generate(vector<int>& v, vector<int>& S, int start)
+            {
+                if(start == S.size())  // 注意与combinations 区别 
+                    // res.push_back(v);
+                    return; 
+
+                for(int i = start; i < S.size(); i++)
+                {
+                    v.push_back(S[i]);
+                    res.push_back(v);   // 在这push back
+                    generate(v, S, i+1);
+                    v.pop_back();
+
+                    // skip duplicate number 
+                    while(i < S.size()-1 && S[i] == S[i+1])
+                        i++;
+                }
+
+            }
+        }
+
+};
+
+
+///////////////////////////////////////////
+combinations/subsets: 在 m 个元素里选 0-m个，顺序固定
+permutation: 在 m 个元素里选 m个, 不同顺序
+
+
+Permutations
+Given a collection of numbers, return all possible permutations. 
+input: [1,2,3]. output:[1,2,3],[1,3,2] ... [3,2,1]
+
+
+class Solution
+{
+public:
+    vector<vector<int>> permute(vector<int>& num)
+    {
+        vector<vector<int>> permutations;
+        if(num.size == 0)
+            return permutations;
+
+        vector<int> curr;
+        vector<bool> isVisited(num.size(), false);
+
+        backTracking(permutation, curr, isVisited, num);
+
+        return permutations; 
+    }
+
+    void backTracking(vector<vector<int>>& ret, vector<int> curr, vector<bool> isVisited, vector<int> num)
+    {
+        if(curr.size() == num.size())
+        {
+            ret.push_back(curr);
+            return;
+        }
+
+        for(int i = 0; i < num.size(); ++i)
+        {
+            if(isVisited[i] == false)   // difference 
+            {
+                isVisited[i] = true;    // difference
+                curr.push_back(num[i]);
+                backTracking(ret, curr, isVisited, num);  // difference: 注意没有+1操作
+                curr.pop_back();
+                isVisited[i] = false;  
+            }
+        }
+
+    }
+
+};
+
+=========================================
+Permutations
+Given a collection of numbers with duplicate number, return all possible permutations without duplicate. 
+input: [1,2,2]. output:[1,2,2],[1,3,2] ... [3,2,1]
+
+solution: 先排序
+
+class Solution
+{
+public:
+    vector<vector<int>> permute(vector<int>& num)
+    {
+        vector<vector<int>> permutations;
+        if(num.size == 0)
+            return permutations;
+
+        vector<int> curr;
+        vector<bool> isVisited(num.size(), false);
+
+        sort(num.begin(), num.end());
+        backTracking(permutation, curr, isVisited, num);
+
+        return permutations; 
+    }
+
+    void backTracking(vector<vector<int>>& ret, vector<int> curr, vector<bool> isVisited, vector<int> num)
+    {
+        if(curr.size() == num.size())
+        {
+            ret.push_back(curr);
+            return;
+        }
+
+        for(int i = 0; i < num.size(); ++i)
+        {
+            if(isVisited[i] == false)   // difference 
+            {
+                isVisited[i] = true;    // difference
+                curr.push_back(num[i]);
+                backTracking(ret, curr, isVisited, num);  // difference: 注意没有+1操作
+                curr.pop_back();
+                isVisited[i] = false;  
+
+                while(i < num.size() - 1 && num[i] == num[i+1])  // remove duplicates, 常用技巧
+                    ++i; 
+            }
+        }
+
+    }
+
+    
+///////////////////////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
