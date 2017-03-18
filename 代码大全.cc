@@ -1,4 +1,4 @@
-http://www.geeksforgeeks.org/program-for-nth-fibonacci-number/  
+ http://www.geeksforgeeks.org/program-for-nth-fibonacci-number/
 
 
 
@@ -450,7 +450,7 @@ vector<vector<int>> threeSum(vector<int>& arr, int target)
 
             while(k < l)
             {
-                if(ar[i] + arr[j] + arr[k] + arr[l] == target)
+                if(arr[i] + arr[j] + arr[k] + arr[l] == target)
                 {
                     cur.push_back(arr[i]);
                     cur.push_back(arr[j]);
@@ -562,6 +562,47 @@ int findMin(vector<int> arr)
 }
 
 
+my solution: 
+  int findMin(vector<int>& nums) {
+        if(nums.size() == 0)
+            return 0;
+        else if(nums.size() == 1)
+            return nums[0];
+        else if(nums.size() == 2)
+            return min(nums[0], nums[1]);
+            
+        if(nums[0] < nums[nums.size() - 1] )
+            return nums[0];
+            
+    int lower = 0;
+    int upper = int(nums.size() - 1);
+    
+    int mid;
+    
+    while(lower < upper)
+    {
+        
+        mid = lower + (upper - lower)/2;
+        
+        if(nums[mid] < nums[mid - 1] && nums[mid] < nums[mid + 1])
+            return nums[mid];
+        
+        if(nums[lower] < nums[mid])
+            lower = mid;
+        else if(nums[lower] > nums[mid])
+            upper = mid;
+            
+            
+        if(mid == 0)
+            return nums[0];
+        
+        if(mid == (nums.size() - 2))
+            return nums[nums.size() - 1];
+    }
+    
+    return 0;
+    }
+
 ==========================================
 find minimum in rotated sorted array, the sorted array has duplicate number 
 
@@ -648,7 +689,7 @@ int largestHistRectangle(vector<int>& height)
 ==================================================
 maxRectangle, find the largest rectangle containging all ones and return its area
 input: 0-1 matrix 
-基于上题, matrix的每一行都计算maxHistRectangle,  http://www.geeksforgeeks.org/maximum-size-rectangle-binary-sub-matrix-1s/
+基于上题, matrix的每一行都计算maxHistRectangle,  www.geeksforgeeks.org/maximum-size-rectangle-binary-sub-matrix-1s/
 
 
 int maxRectangle(vector<vector<int>>& matrix)
@@ -701,6 +742,7 @@ bool isPalindrome(int num)
 ========================================
 search 2D matrix, each row is sorted from small to large, the first element of each row is larger than the last element of previous row 
 
+solution: 会超时 
 bool searchMatrix(const vector<vector<int>>& matrix, const int target)
 {
 
@@ -838,6 +880,7 @@ int peakElement(vector<int>& arr)
 Missing number 
 Array containing n distinct numbers from 0 ,1, 2..n. find the missing number 
 
+solution 1: 
 int missingNum(vector<int>& num)
 {
     int x = 0; 
@@ -850,11 +893,14 @@ int missingNum(vector<int>& num)
 }
 
 
+solution 2: 
 n sorted number: 0..n, but 1 number is missing. Find out that number 
 binary search 
 
 int solution(vector<int>& arr)
 {
+	int lowerBound = 0; 
+	int upperBound = arr.size(); 
 
     while(lowerBound < upperBound)
     {
@@ -876,6 +922,30 @@ int solution(vector<int>& arr)
             lowerBound = mid; 
     }
 } 
+
+
+solution 3: 
+int missingNumber(vector<int>& arr) {
+        
+        sort(arr.begin(), arr.end());
+        
+        int lowerBound = 0; 
+	int upperBound = arr.size(); 
+
+    while(lowerBound < upperBound)  // 注意
+    {
+        int mid = lowerBound + (upperBound - lowerBound)/2; 
+        
+        if(arr[mid] > mid)
+            upperBound = mid;  // 注意
+        // else if(arr[mid] == mid)  // arr[mid] 不可能小于mid
+        else 
+            lowerBound = mid + 1;  // 注意
+            
+    }
+       return upperBound;  // 注意
+        
+    }
 
 =========================================
 power of two
@@ -1058,7 +1128,8 @@ int kthSmallest(int arr[], int n, int k)
 path sum 
 
 solution 1: 
-bool hasPathSum(TreeNode* root, int sum) {
+bool hasPathSum(TreeNode* root, int sum) 
+{
     if(root == NULL)
     {
         // if(sum == 0)
@@ -1067,7 +1138,6 @@ bool hasPathSum(TreeNode* root, int sum) {
         return false;
     }
     
-    bool ans = 0; 
     
     int remain = sum - root->val;
     if( remain == 0 && node->left == NULL && node->right == NULL )
@@ -1076,7 +1146,8 @@ bool hasPathSum(TreeNode* root, int sum) {
     return hasPathSum(root->left, remain) || hasPathSum(root->right, remain);
 
 
-    /////// be low solution is false, I don't know why 
+    //solution 2:
+    /////// be low solution is correct, I don't know why 
     // if(root->left)
     //     return hasPathSum(root->left, remain);
     
@@ -1087,7 +1158,7 @@ bool hasPathSum(TreeNode* root, int sum) {
 
 }
 
-solution 2: 
+solution 3: 
   bool hasPathSum(TreeNode* node, int sum) {
   if(node == NULL)
   {
@@ -3212,6 +3283,7 @@ public:
 
 };
 
+
 =========================================
 Permutations
 Given a collection of numbers with duplicate number, return all possible permutations without duplicate. 
@@ -3264,61 +3336,890 @@ public:
 
     
 ///////////////////////////////////////
+Single Number III
+Given an array of numbers nums, in which exactly two elements appear only once and all the other elements appear exactly twice. Find the two elements that appear only once.
+    
+
+    vector<int> singleNumber(vector<int>& A)
+    {
+        int x = 0;
+        size_t len = A.size();
+        int pos = 0;
+        for (int i = 0; i < len; ++i)
+            x ^= A[i];
+        
+        // get the first bit position of these two elements that number is different
+        for (int i = 0; i < 32; ++i)
+        {
+            if (x & (1 << i))    // 1<<0 == 0; 1 << 1 == 1; 
+            {  
+                pos = i;
+                break;
+            }
+        }
+        
+        // 把所有数分成两拨， 和那first bit position相&为0的和不为0的；
+        vector<int> results(2);
+        for (int i = 0; i < len; ++i)
+        {
+            if (A[i] & (1 << pos))   // 不为0的
+                results[0] ^= A[i];
+            else                      // 为0的
+                results[1] ^= A[i];
+        }
+        
+        return results;
+        
+    }
+    
+    
+Single Number II   
+Given an array of integers, every element appears three times except for one, 
+which appears exactly once. Find that single one.
+
+1. 对每一位进行求和
+2. 对每一位的和做%3运算，来消去所有重复3次的数
+
+
+  int singleNumber(vector<int>& A) 
+    {
+        int n = A.size(); 
+        int res = 0;
+        for(int i=31; i>=0; i--) {
+            int sum = 0;
+            int mask = 1<<i;
+            for(int j=0; j<n; j++) {
+                if(A[j] & mask) 
+                    sum++;
+            }
+            res = (res<<1) + (sum%3);
+        }
+        return res;
+        
+    }
+
+////////////////////////////////////
+ K-diff Pairs in an Array  
+
+ Given an array of integers and an integer k, you need to find the number of unique k-diff pairs in the array. 
+ Here a k-diff pair is defined as an integer pair (i, j), where i and j are both numbers in the array and their absolute difference is k.
+The pairs (i, j) and (j, i) count as the same pair, but return only one. 
+
+int findPairs(vector<int>& nums, int k) 
+{
+    int count = 0; 
+    
+    sort(nums.begin(), nums.end());
+    
+    for(int i = 0; i < nums.size(); )
+    {
+        for(int j = i+1; j < nums.size(); )
+        {
+            if(abs(nums[i] - nums[j]) == k)
+            {
+                count++;
+            }
+            
+            while(nums[j] == nums[j+1])
+            {
+                ++j; 
+            }
+            ++j;
+        }
+        
+        while(nums[i] == nums[i+1])
+        {
+            ++i; 
+        }
+        ++i;
+        
+    }
+    return count; 
+}
+
+//////////////////////////////   
+Lonely Pixel I 
+
+Given a picture consisting of black and white pixels, find the number of black lonely pixels.
+The picture is represented by a 2D char array consisting of 'B' and 'W', which means black and white pixels respectively.
+A black lonely pixel is character 'B' that located at a specific position where the same row and same column don not have any other black pixels.
+
+[['W', 'W', 'B'],
+ ['W', 'B', 'W'],
+ ['B', 'W', 'W']] 
+
+int findLonelyPixel(vector<vector<char>>& picture) 
+    {
+        vector<int> row(picture.size(), 0); 
+        vector<int> col(picture[0].size(), 0);
+        
+        for(int i = 0; i < picture.size(); ++i)
+        {
+            int count = 0; 
+            for(int j = 0; j < picture[i].size(); ++j)
+            {
+                if(picture[i][j] == 'B')
+                    count++; 
+                
+            }
+            row[i] = count; 
+        }
+        
+        for(int i = 0; i < picture[0].size(); ++i)
+        {
+            int count = 0; 
+            for(int j = 0; j < picture.size(); ++j)
+            {
+                if(picture[j][i] == 'B')
+                    count++;
+            }
+            col[i] = count; 
+            
+        }
+        
+        int count = 0; 
+        for(int i = 0; i < picture.size(); ++i)
+        {
+            for(int j = 0; j < picture[i].size(); ++j)
+            {
+                if(picture[i][j] == 'B')  //这一行很重要 
+                {
+                    if(row[i] == 1)
+                    {
+                        if(col[j] == 1)
+                            count++;                                         
+                    }               
+                }               
+            }
+ 
+        }        
+        return count;              
+    }
+
+//////////////////////////////////////////   
+First bad version. 
+
+You are a product manager and currently leading a team to develop a new product. Unfortunately, the latest version of your product fails the quality check. Since each version is developed based on the previous version, all the versions after a bad version are also bad.
+Suppose you have n versions [1, 2, ..., n] and you want to find out the first bad one, which causes all the following ones to be bad.
+You are given an API bool isBadVersion(version) which will return whether version is bad. Implement a function to find the first bad version. You should minimize the number of calls to the API.
+
+solution 1: 
+ int firstBadVersion(int n) {
+        int low = 1, high = n; 
+        // int mid = low + (high-low)/2; 
+        
+        while(low + 1 < high)
+        // while(low < high)   // this is wrong 
+        {
+            int mid = low + (high-low)/2; 
+
+            if(isBadVersion(mid))
+            {
+               high = mid; 
+            }
+            else
+            {
+                low = mid; 
+            }
+            // mid = low + (high-low)/2;
+        
+        }
+        
+        // 不能确定只return low, or 只return high. 有可能都是bad version
+        if(isBadVersion(low))
+            return low;
+        else 
+            return high; 
+        
+    }
+
+
+solution 2: 
+int firstBadVersion(int n) {
+        int low = 1, high = n; 
+        
+        // while(low + 1 < high)
+        while(low < high)   // this is wrong 
+        {
+            int mid = low + (high-low)/2; 
+
+            if(isBadVersion(mid))
+            {
+               high = mid; 
+            }
+            else
+            {
+            	// low = mid;  // 否则会出现死循环，low一直比high小. 原因是除法是向下取整 
+                low = mid + 1;  // 注意区别
+            }
+        }
+        
+        // 不能确定只return low, or 只return high. 有可能都是bad version
+        // if(isBadVersion(low))
+        //     return low;
+        // else 
+            return high; 
+        
+    }
+
+
+solution 3: 
+int firstBadVersion(int n) {
+        int low = 1, high = n; 
+        
+        // while(low + 1 < high)
+        // while(low < high)   // this is wrong 
+        while(low <= high)    
+        {
+            int mid = low + (high-low)/2; 
+
+            if(isBadVersion(mid))
+            {
+               high = mid - 1; 
+            }
+            else
+            {
+            	// low = mid;  // 否则会出现死循环，low一直比high小. 原因是除法是向下取整 
+                low = mid + 1;  // 注意区别
+            }
+        }
+        
+        // 不能确定只return low, or 只return high. 有可能都是bad version
+        // if(isBadVersion(low))
+        //     return low;
+        // else 
+            return low;  // 或者  return high + 1; 
+            return high + 1; 
+        
+    }
+
+//////////////////////////////////////////
+Search Insert Position
+
+Given a sorted array and a target value, return the index if the target is found. If not, return the index where it would be if it were inserted in order.
+
+You may assume no duplicates in the array.
+
+Here are few examples.
+[1,3,5,6], 5 → 2
+[1,3,5,6], 2 → 1
+[1,3,5,6], 7 → 4
+[1,3,5,6], 0 → 0
+
+
+int searchInsert(vector<int>& nums, int target) {
+        int low = 0; 
+        int high = nums.size(); 
+        
+        while(low < high)
+        {
+            int mid = low + (high-low)/2; 
+            if(nums[mid] == target) 
+                return mid; 
+            else if(nums[mid] > target)
+                high = mid;
+            else
+                low = mid + 1; 
+            
+        }
+        
+        // return high; 
+        return low;   // 注意是return low ， 这里return 的只是inserted index. target index上面返回
+        
+        
+    }
 
 
 
+=============================================
+Search for a Range
+Given an array of integers sorted in ascending order, find the starting and ending position of a given target value.
+
+Your algorithms runtime complexity must be in the order of O(log n).
+
+If the target is not found in the array, return [-1, -1].
+
+For example,
+Given [5, 7, 7, 8, 8, 10] and target value 8,
+return [3, 4]. 
+
+solution: 关键target在数组中的左右边界， 要分别往左搜和往右搜，need two binary search 
+class Solution {
+public:
+    vector<int> searchRange(vector<int>& nums, int target) {
+     
+        
+              vector<int> ret; 
+         // vector has 0 element
+        if(nums.size() == 0)
+        {
+             ret.push_back(-1);
+            ret.push_back(-1);
+            return ret; 
+        }
+        
+        // vector has only one element
+        if(nums.size() == 1 && nums[0] == target)
+        {
+            ret.push_back(0);
+            ret.push_back(0);
+            return ret; 
+            
+        }
+        else if(nums.size() == 1 && nums[0] != target)
+        {
+            ret.push_back(-1);
+            ret.push_back(-1);
+            return ret; 
+            
+        }
+        
+        
+           int low = 0; 
+        int high = nums.size(); 
+        
+        // 往左搜
+        while(low < high)
+        {
+            int mid = low + (high - low)/2; 
+            
+            if(nums[mid] == target)
+                high = mid; 
+            else if(nums[mid] > target)
+                high = mid; 
+            else if(nums[mid] < target)
+                low = mid + 1; 
+            
+        }
+        
+       // 注意这几行代码 
+        if(high == nums.size())
+            ret.push_back(-1);
+        else if(nums[high] == target)
+            ret.push_back(high);
+        else
+            ret.push_back(-1);
+            
+        
+        low = 0; 
+        high = nums.size(); 
+        
+        // 往右搜
+         while(low + 1 < high)
+        {
+            int mid = low + (high - low)/2; 
+            
+            if(nums[mid] == target)
+                low = mid; 
+            else if(nums[mid] > target)
+                high = mid; 
+            else if(nums[mid] < target)
+                low = mid + 1; 
+        }
+        
+        
+        if(nums[low] == target)
+            ret.push_back(low);
+        else
+            ret.push_back(-1);
+        
+        
+        return ret; 
+        
+    }
+};
+
+
+========================================
 
 
 
+ bool isPerfectSquare(int num) {
+        long low = 1; 
+        long high = num; 
+        
+        // while(low < high)  // wrong: 因为low和high可能会需要相等， 当num=1时。  
+        while(low <= high)
+        {
+            long mid = low + (high - low)/2; // 注意是long型, 用int会超时 
+            if(mid * mid == num)
+                return true;
+            else if(mid * mid < num)
+                low = mid +1;
+            else 
+                high = mid-1; 
+    
+        }
+        
+        return false;     
+        
+    }
+
+
+====================================
+
+每个houses对应所以的heaters, 在此前提下对所有heaters进行binary search, 找出离那个house左边和右边最近的两个heaters, 然后这两个heaters取距离最小的那个.  
+
+对所有houses重复上面算法，取上面所得距离最大的那个  
+
+    int findRadius(vector<int>& houses, vector<int>& heaters) {
+        int res = 0, n = heaters.size();
+        sort(heaters.begin(), heaters.end());
+        for (int house : houses) 
+        {	
+
+        	int left = 0, right = n;
+            
+            while (left < right) 
+            {
+                int mid = left + (right - left) / 2;
+
+                if (heaters[mid] < house) // 找到那个heater刚比house大的
+                	left = mid + 1;
+                else 
+                	right = mid;
+            }
+
+            // int dist1 = (right == n) ? INT_MAX : heaters[right] - house;
+            // int dist2 = (right == 0) ? INT_MAX : house - heaters[right - 1];
+
+            int dist1, dist2; // need to be visible to the line : max(res, min(dist1, dist2)) 
+
+            if(right == n)   // right == n 时, 超出index范围. house有可能只有左边或只有右边有heater (只有一个heater时), 所以要用INT_MAX.  
+            	dist1 = INT_MAX;   // 有比house大的heater, 但没有比house小的heater, 所以用INT_MAX
+            else 
+            	dist1 = heaters[right] - house; 
+
+            if(right == 0)  // 有比house小的heater, 但没有比house大的heater, 所以用INT_MAX
+            	dist2 = INT_MAX; 
+            else 
+            	dist2 = house - heaters[right-1]; 
+
+            res = max(res, min(dist1, dist2));
+        }
+
+        return res;
+    }
+
+===============================================  
+Intersection of Two Arrays 
+Given two arrays, write a function to compute their intersection. 
+
+
+ vector<int> intersection(vector<int>& nums1, vector<int>& nums2) {
+        vector<int> ret; 
+        
+        sort(nums1.begin(), nums1.end());
+        sort(nums2.begin(), nums2.end());
+        
+        for(int i = 0; i < nums1.size(); ++i)
+        {
+       
+       	// nlogn solution:  using binary search 
+
+            int low = 0; 
+            int high = nums2.size();
+            while(low < high)
+            {
+                int mid = low + (high-low)/2;
+                
+                if(nums2[mid] == nums1[i])
+                {
+                    ret.push_back(nums2[mid]);
+                    break; 
+                    
+                }
+                else if(nums2[mid] > nums1[i])
+                    high = mid; 
+                else 
+                    low = mid +1;                     
+            }
+            
+            
+        // n^2 solution: 
+
+            // for(int j = 0; j < nums2.size(); ++j)
+            // {
+            //     //  while(nums2[j] == nums2[j+1])
+            //     //     ++j;
+                    
+            //     if(nums2[j] == nums1[i])
+            //     {
+            //         ret.push_back(nums2[j]);
+                
+            //         break;
+            //     }
+            // }
+
+            while(nums1[i] == nums1[i+1])
+                ++i; 
+        }
+        
+        return ret;         
+    }
+
+=====================================
+Intersection of Two Arrays II 
+
+Given two arrays, write a function to compute their intersection. 
+
+Example:
+Given nums1 = [1, 2, 2, 1], nums2 = [2, 2], return [2, 2].  // 最小重复值 
+
+Note:
+Each element in the result should appear as many times as it shows in both arrays.
+The result can be in any order.
 
 
 
+vector<int> intersect(vector<int>& nums1, vector<int>& nums2) {
+        sort(nums1.begin(), nums1.end());
+        sort(nums2.begin(), nums2.end());
+        
+        vector<int> ret;
+        
+        int i= 0, j = 0; 
+         while(i < nums1.size() && j < nums2.size())  // two index/pointer 
+        {
+                if(nums1[i] == nums2[j])
+                {
+                    ret.push_back(nums1[i]);
+                    i++, j++; 
+                }
+                else if(nums1[i] > nums2[j])
+                    j++;
+                else 
+                    i++; 
+         
+        }
+        return ret; 
+        
+    }
+
+=======================================
+Two Sum II - Input array is sorted
+Given an array of integers that is already sorted in ascending order, find two numbers such that they add up to a specific target number.
+
+The function twoSum should return indices of the two numbers such that they add up to the target, where index1 must be less than index2. Please note that your returned answers (both index1 and index2) are not zero-based.
+
+Input: numbers={2, 7, 11, 15}, target=9
+Output: index1=1, index2=2
+
+
+ vector<int> twoSum(vector<int>& numbers, int target) {
+        
+        vector<int> ret; 
+        
+        int i = 0; 
+        int j = numbers.size()-1; 
+        
+        while(i < numbers.size() && j > 0)
+        {
+            if(numbers[i] + numbers[j] == target)
+            {
+                ret.push_back(i+1);
+                ret.push_back(j+1);
+                break;  
+            }
+            else if(numbers[i] + numbers[j] > target)
+                --j;
+            else 
+                ++i; 
+        }
+        return ret; 
+    }
+
+==========================================
+Implement int sqrt(int x).
+
+input: 5
+output: 2
+
+这道题准确来说是找 a*a <= x; sqrt root可以比x小	
+Corner case: 
+(1) x<0，return -1表示出错（需要和面试官讨论）。
+(2) x=0或1，此时mid=0，会形成x/y = 0/0。需要特殊处理。
+
+int mySqrt(int x) 
+{
+        int low = 0; 
+        int high = x;
+        
+        if(x <= 1)  // 0/1 corner cases; 
+            return x; 
+            
+        while(low <= high)  // 因为low有可能等于high
+        {
+            int mid = low + (high-low)/2;   
+            // if(mid*mid == x)  // wrong: mid太大时，mid*mid会超出范围. 若long mid; 则可以通过  
+            if(x/mid == mid)
+                return mid; 
+            // else if(mid*mid < x)  // wrong
+            else if(x/mid > mid)
+                low = mid+1; 
+            else
+                high = mid-1;
+        }
+        
+        // return low; // wrong: low的值比high大，low 确保 mid*mid > x, 因为 low = mid+1
+        return high;  // 要往下取, high 确保 mid*mid < x, 因为 high = mid-1
+        
+    }
+
+=========================================   
+You have a total of n coins that you want to form in a staircase shape, where every k-th row must have exactly k coins.
+
+Given n, find the total number of full staircase rows that can be formed.
 
 
 
+O(n) 解法
+int arrangeCoins(int n) {
+        // 1+2+3+...x <= n 
+        // return x 
+        
+        int count = 0;
+        while(n >= 0)
+        {
+            count++; 
+            n = n - count;
+            
+        }
+        return count-1; 
+    }
+
+
+logn 解法
+ int arrangeCoins(int n) {
+        // 1+2+3+...x <= n 
+        // return x 
+        
+        if (n <= 1) return n;
+        long low = 1, high = n;
+        
+        while (low < high) 
+        {
+            long mid = low + (high - low) / 2; // 注意是long型，计算前i行之和有可能会整型溢出
+            if (mid * (mid + 1) / 2 <= n) 
+                low = mid + 1;
+            else 
+                high = mid;
+        }
+        return low - 1;  // 注意不是low, 因为返回的x*(x+1)/2要>=n. 类似上面题目 
+    }
+
+==============================  
+Divide Two Integers 
+
+Divide two integers without using multiplication, division and mod operator.
+
+If it is overflow, return MAX_INT.
+
+solution: 这个解法会超时， 
+int divide(int dividend, int divisor) {
+
+        if(divisor == 1)
+            return dividend;
+        if(dividend == INT_MIN && abs(divisor) == 1)
+            return INT_MAX;  // abs(INT_MIN) 等于 INT_MIN
+        
+        // long long a = dividend >= 0 ? dividend : -(long long) dividend;
+        // long long b = divisor >= 0 ? divisor : -(long long) divisor;
+        long long a = abs((long long) dividend);
+        long long b = abs((long long) divisor);
+        // long long b = abs(divisor); // wrong: int 不够大，会溢出
+        
+        
+        long long count = 0; 
+
+        while(a >= 0)
+        {
+                a = a - b;
+                count++;
+        }
+        
+        if((dividend < 0 && divisor > 0) || (dividend > 0 && divisor < 0) )
+            return -(count-1); 
+        else 
+            return count-1; 
+}
+
+
+=======================================  
+Search in Rotated Sorted Array
+Suppose an array sorted in ascending order is rotated at some pivot unknown to you beforehand.
+
+(i.e., 0 1 2 4 5 6 7 might become 4 5 6 7 0 1 2).
+
+You are given a target value to search. If found in the array return its index, otherwise return -1.
+
+You may assume no duplicate exists in the array.
+
+solution: 
+A[mid] =  target, 返回mid，否则
+
+(1) A[mid] < A[end]: A[mid+1 : end] sorted
+A[mid] < target <= A[end]  右半，否则左半。
+
+(2) A[mid] > A[end] : A[start : mid-1] sorted
+A[start] <= target < A[mid] 左半，否则右半。
 
 
 
+int search(vector<int>& A, int target) {
+   int n = A.size();
+        int start = 0, end = n-1;
+
+        while(start <= end) {   // 有可能出现一个元素, 所以用<=
+            int mid = start + (end-start)/2;
+            if(A[mid]==target) return mid;  
+            
+            if(A[mid]<A[end]) 
+            { // right half sorted
+                if(target>A[mid] && target<=A[end])
+                    start = mid+1;
+                else
+                    end = mid-1;
+            }
+            else {  // left half sorted
+                if(target>=A[start] && target<A[mid]) 
+                    end = mid-1;
+                else
+                    start = mid+1;
+            }
+        }
+        return -1;
+    }
 
 
+==========================================  
+Pow(x, n)
+
+solution1 : 注意n有可能为负数， n可以为奇数或偶数
+这个解法用到recursion. 
 
 
+double power(double x, int n) 
+{
+    if (n == 0) 
+    	return 1.0;
+
+    double ret = power(x, n / 2);
+
+    if (n % 2 == 0) 
+    	return ret * ret;
+    else 
+    	return x * ret * ret;
+}
 
 
+double myPow(double x, int n) 
+{
+  if(n == 0)
+        return 1.0; 
+
+    if(n < 0) 
+    	return 1 / power(x, -n);
+    
+    if(n > 0)return power(x, n);
+}
 
 
+solution2: 
+
+   double myPow(double x, int n) {
+        double ret = 1.0; 
+        
+        if(n == 0)
+            return ret; 
+        
+        ret = myPow(x, n/2);
+        if(n%2 == 0)
+            return ret*ret; 
+        else if(n > 0)
+            return ret*ret*x; 
+        else if(n < 0)
+            return ret*ret/x;  // 为什么要这样处理, 不理解 
+            
+    }
+
+===========================================   
+
+Search a 2D Matrix  
+solution: two index/pointer method 
+bool searchMatrix(vector<vector<int>>& matrix, int target) 
+{
+    
+    if(matrix.size() == 0 || matrix[0].size() == 0)
+        return false; 
+    
+    int i = 0;
+    int j = matrix[0].size()-1;
+    
+    while(i < matrix.size() && j >= 0)
+    {
+            if(matrix[i][j] == target)
+                return true; 
+            // else if(matrix[i][j] > target)   // 错误，因为else if和else的内容位置
+            //     --j; 						// 注意和下面区别 
+            // else
+            //     ++i; 
+            else if(target > matrix[i][j])
+                ++i; 
+            else
+                --j; 
+     
+    }       
+    return false; 
+}
+
+============================================      
+Search in Rotated Sorted Array II  
+
+当有重复数字，会存在A[mid] = A[end]的情况。此时右半序列A[mid-1 : end]可能是sorted，也可能并没有sorted，如下例子。
+
+3 1 2 3 3 3 3 
+3 3 3 3 1 2 3
+
+所以当A[mid] = A[end] != target时，无法排除一半的序列，而只能排除掉A[end]：
+
+A[mid] = A[end] != target时：搜寻A[start : end-1]
+
+正因为这个变化，在最坏情况下，算法的复杂度退化成了O(n)：
+序列 2 2 2 2 2 2 2 中寻找target = 1。
 
 
+bool search(vector<int>& A, int target) 
+{
 
+	    int n = A.size();
+        int start = 0, end = n-1;
+        while(start<=end) {
+            int mid = start + (end-start)/2;
+            if(A[mid]==target) return true;  
+            
+            if(A[mid]<A[end]) { // right half sorted
+                if(target>A[mid] && target<=A[end])
+                    start = mid+1;
+                else
+                    end = mid-1;
+            }
+            else if(A[mid] > A[end]) {  // left half sorted
+                if(target>=A[start] && target<A[mid]) 
+                    end = mid-1;
+                else
+                    start = mid+1;
+            }
+            else
+                end--; 
+        }
+        // return -1;
+        
+        return false; 
+        
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+==========================================  
 
 
 
