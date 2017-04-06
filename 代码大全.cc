@@ -1,4 +1,8 @@
- http://www.geeksforgeeks.org/program-for-nth-fibonacci-number/
+vector<int> vec(vec1.size(), 0);  // vec 初始化为 vec1大小，值全为0 
+ 
+
+==================================
+www.geeksforgeeks.org/program-for-nth-fibonacci-number/
 
 
 
@@ -852,7 +856,7 @@ arr[-1] = arr[n] = INT_MIN;
 
 int peakElement(vector<int>& arr)
 {
-    if(num.size() == 1)
+    if(arr.size() == 1)
         return 0; 
 
     int lowerBound = 0; 
@@ -863,7 +867,7 @@ int peakElement(vector<int>& arr)
     {
         mid = lowerBound + (upperBound - lowerBound)/2;   //往下取整 
 
-        if(mid == 0 || arr[mid] >= num[mid-1]) && (mid == n -1 || arr[mid] >= arr[mid+1])
+        if(mid == 0 || arr[mid] >= arr[mid-1]) && (mid == arr.size() -1 || arr[mid] >= arr[mid+1])
             return mid;
         else if(arr[mid - 1] > arr[mid])  // 注
             upperBound = mid - 1;  // 注, 因为arr[-1] = INT_MIN
@@ -875,6 +879,25 @@ int peakElement(vector<int>& arr)
 
 }
 
+
+solution 2: 
+
+    int findPeakElement(vector<int>& nums) 
+    {
+
+		int left = 0, right = nums.size() - 1;  // right != nums.size(); 因为有可能输入一个元素
+
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] < nums[mid + 1]) 
+            	left = mid + 1;
+            else 
+            	right = mid;
+        }
+
+        return right;
+    }
 
 ===========================================
 Missing number 
@@ -3535,7 +3558,8 @@ solution 1:
 
 
 solution 2: 
-int firstBadVersion(int n) {
+int firstBadVersion(int n) 
+{
         int low = 1, high = n; 
         
         // while(low + 1 < high)
@@ -4220,6 +4244,994 @@ bool search(vector<int>& A, int target)
     }
 
 ==========================================  
+Minimum Size Subarray Sum 
+
+我们用两个指针维护一个窗口，保证这个窗口的内的和是小于目标数的。如果新来的数加上后，和大于目标，则比较下当前窗口长度和最短窗口长度，窗口左边界右移。如果和仍小于目标数，则将窗口右边界右移。注意这里退出的条件，右边界是小于等于长度，因为我们窗口到了最右侧时，还需要继续左移左边界来看有没有更优的解法。另外，如果左边界大于右边界时，说明最短子串的长度已经小于等于1，我们就不用再查找了。
+
+solution 1: O(n)
+int minSubArrayLen(int s, vector<int>& nums) {
+        if(nums.size() == 0)
+            return 0; 
+        
+        int left = 0, right = 0, sum = 0, minLen = nums.size()+1;
+        while(right <= nums.size() && left <= right)
+        {
+            if(sum < s)
+            {
+                // 当右边界等于长度时，我们要多等一轮，等待左边界左移，这时候不能加
+                if(right < nums.size())
+                    sum += nums[right];
+                
+                right++; 
+            }
+            else
+            {
+                // 当和大于等于目标时，检查长度并左移边界
+                minLen = min(minLen, right-left);
+                sum -= nums[left];
+                left++; 
+            }
+        }
+        
+        return minLen <= nums.size() ? minLen : 0;
+        
+    }
+
+solution 2: binary search O(nlong)
+
+
+==============================================  
+
+Longest Palindromic Substring
+Given a string s, find the longest palindromic substring in s.   
+
+solution 1: Manacher Algorithm 
+www.youtube.com/watch?v=nbTSfrEfo6M   // 讲解 
+
+string longestPalindrome(string s) 
+{
+    
+    string t = "$#";
+    for(int i = 0; i < s.size(); ++i)
+    {
+        t += s[i];
+        t += "#"; 
+    }
+    // t += "@";   // 这行可要可不要
+    
+    vector<int> p(t.size(), 0); 
+    
+    int C = 0, R = 0; 
+    
+    for(int i = 1; i < t.size() -1; ++i)
+    {
+        int mirr = 2*C - i; 
+        
+        if(i < R)
+            p[i] = min(R - i, p[mirr]);
+            
+        while(t[i + (1 + p[i])] == t[i - (1 + p[i])])
+            p[i]++; 
+            
+        if(i + p[i] > R)
+        {
+            C = i; 
+            R = i + p[i];
+        }
+     }
+     
+     int length = 0; 
+     C = 0;
+     for(int i = 1; i < p.size()-1; ++i)
+     {
+         if(p[i] > length)
+         {
+             length = p[i]; 
+             C = i;
+         }
+     }
+     
+    //  return s.substr((C - 1 - length)/2, (C - 1 + length)/2 );   // wrong: substr(begin_index, length);  
+    return s.substr((C - 1 - length)/2, length );
+    
+}
+
+time O(n); 
+
+
+solution 2: brutal force (O(n^3)); 
+solution 3: O(n^2) 
+
+
+================================================
+median of two sorted arrays 
+
+leilater.gitbooks.io/codingpractice/content/binary_search/median_of_two_sorted_arrays.html  
+
+
+  /*
+    对于一个长度为n的已排序数列a，若n为奇数，中位数为a[n / 2 + 1] , 
+    若n为偶数，则中位数(a[n / 2] + a[n / 2 + 1]) / 2
+    如果我们可以在两个数列中求出第K小的元素，便可以解决该问题
+    不妨设数列A元素个数为n，数列B元素个数为m，各自升序排序，求第k小元素
+    取A[k / 2] B[k / 2] 比较，
+    如果 A[k / 2] > B[k / 2] 那么，所求的元素必然不在B的前k / 2个元素中(证明反证法)
+    反之，必然不在A的前k / 2个元素中，于是我们可以将A或B数列的前k / 2元素删去，求剩下两个数列的
+    k - k / 2小元素，于是得到了数据规模变小的同类问题，递归解决
+    如果 k / 2 大于某数列个数，所求元素必然不在另一数列的前k / 2个元素中，同上操作就好。
+    */
+
+// A_st(数组A的最左端), B_st(数组B的最右端) 类似于low, high; 随时移动
+    double findKth(vector<int>& A, vector<int>& B, int A_st, int B_st, int k) 
+    {
+        // 边界情况，任一数列为空
+        if (A_st >= A.size()) 
+        {
+            return B[B_st + k - 1];
+        }
+
+        if (B_st >= B.size()) 
+        {
+            return A[A_st + k - 1];  // 数组里的k-1和函数里的k是一个意思：第k个元素
+        }
+
+        // k等于1时表示取最小值，直接返回min
+        if (k == 1) return min(A[A_st], B[B_st]);
+
+        int A_key = A_st + k / 2 - 1 >= A.size() ? INT_MAX : A[A_st + k / 2 - 1];
+        int B_key = B_st + k / 2 - 1 >= B.size() ? INT_MAX : B[B_st + k / 2 - 1];
+
+        if (A_key < B_key)
+        {
+            return findKth(A, B, A_st + k / 2, B_st, k - k / 2);  // recusion 
+        } 
+        else 
+        {
+            return findKth(A, B, A_st, B_st + k / 2, k - k / 2);   // recursion 
+        }
+        
+    }
+
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) 
+    {
+        int sum = nums1.size() + nums2.size();
+        double ret;
+        
+        if (sum & 1)   //判断奇偶数
+        {
+            ret = findKth(nums1, nums2, 0, 0, sum / 2 + 1);
+        } else {
+            ret = ((findKth(nums1, nums2, 0, 0, sum / 2)) +
+                    findKth(nums1, nums2, 0, 0, sum / 2 + 1)) / 2.0;
+        }
+        return ret;
+    }
+
+
+===========================================================
+Search a 2D Matrix II 
+
+Write an efficient algorithm that searches for a value in an m x n matrix. This matrix has the following properties:
+
+Integers in each row are sorted in ascending from left to right.
+Integers in each column are sorted in ascending from top to bottom.  
+
+[
+  [1,   4,  7, 11, 15],
+  [2,   5,  8, 12, 19],
+  [3,   6,  9, 16, 22],
+  [10, 13, 14, 17, 24],
+  [18, 21, 23, 26, 30]
+]
+
+
+
+bool searchMatrix(vector<vector<int>>& matrix, int target) 
+{
+    if(matrix.size() == 0)
+        return false; 
+    
+    // for(int i = 0; i < matrix.size(); )   // there is error 
+    // {
+    //     for(int j = matrix[0].size() -1; j >= 0; )   // there is error , 因为i的值不会在for内循环检查; matrix[i][j] 会越界.  
+    //     {  
+    
+    int i = 0; 
+    int j = matrix[0].size()-1;
+    
+    while(i < matrix.size() && j >= 0)   // while 循环
+    {
+    
+        if(matrix[i][j] == target)
+            return true; 
+        else if(matrix[i][j] > target)
+            --j;
+        else 
+            ++i; 
+    }
+    
+    return false; 
+
+}
+
+
+====================================
+Longest Increasing Subsequence  
+
+Given an unsorted array of integers, find the length of longest increasing subsequence.
+
+For example,
+Given [10, 9, 2, 5, 3, 7, 101, 18],
+The longest increasing subsequence is [2, 3, 7, 101], therefore the length is 4. Note that there may be more than one LIS 
+
+
+int lengthOfLIS(vector<int>& nums) 
+{
+    
+    vector<int> counts(nums.size(), 0);  // counts count the LIS for every number
+    
+    int max = 0;
+    for (int i = 0; i < nums.size(); i++) {
+        counts[i] = 1;
+        for (int j = 0; j < i; j++) 
+        {
+            if (nums[j] < nums[i]) 
+            {
+            	if(counts[i] > counts[j] + 1)
+            		counts[i] = counts[i];
+            	else 
+            		counts[i] = counts[j] + 1; 
+
+                // counts[i] = counts[i] > counts[j] + 1 ? counts[i] : counts[j] + 1;
+            }
+        }
+        if (counts[i] > max) {
+            max = counts[i];
+        }
+    }
+    return max;
+}
+
+======================================
+Kth Smallest Element in a Sorted Matrix  
+
+Given a n x n matrix where each of the rows and columns are sorted in ascending order, find the kth smallest element in the matrix.
+
+Note that it is the kth smallest element in the sorted order, not the kth distinct element.
+k is always valid, 1 ≤ k ≤ n2.  
+
+matrix = [
+   [ 1,  5,  9],
+   [10, 11, 13],
+   [12, 13, 15]
+],
+k = 8,
+return 13.
+
+
+solution 1: maximum heap (c++ priority queue)
+
+int kthSmallest(vector<vector<int>>& matrix, int k) 
+{
+    // priority_queue<int, vector<int>> q;
+    priority_queue<int> q;
+    for (int i = 0; i < matrix.size(); ++i) 
+    {
+        for (int j = 0; j < matrix[i].size(); ++j) 
+        {
+            q.push(matrix[i][j]);
+            if (q.size() > k) 
+            	q.pop();
+        }
+    }
+    return q.top();
+}
+
+
+solution 2: 
+
+=========================================
+Find Right Interval 找右区间  
+
+e.g. Input: [ [1,2] ]  Output: [-1]
+Explanation: There is only one interval in the collection, so it outputs -1.
+
+e.g. Input: [ [3,4], [2,3], [1,2] ] Output: [-1, 0, 1]
+Explanation: There is no satisfied "right" interval for [3,4].
+For [2,3], the interval [3,4] has minimum-"right" start point;
+For [1,2], the interval [2,3] has minimum-"right" start point.
+
+
+
+output: 每个interval 的第一个右区间的index 
+
+ vector<int> findRightInterval(vector<Interval>& intervals) 
+ {
+    vector<int> res;
+    map<int, int> m;
+
+    for (int i = 0; i < intervals.size(); ++i) 
+    {
+        m[intervals[i].start] = i;
+    }
+
+    for (auto a : intervals) 
+    {
+        auto it = m.lower_bound(a.end);
+
+        if (it == m.end()) 
+        	res.push_back(-1);
+        else 
+        	res.push_back(it->second);
+    }
+
+    return res;
+}
+
+============================================   
+Is Subsequence 是子序列  
+
+Given a string s and a string t, check if s is subsequence of t.
+
+"ace" is a subsequence of "abcde" while "aec" is not 
+
+solution: two indexs 
+bool isSubsequence(string s, string t) 
+{
+    if (s.empty()) return true;
+    int i = 0, j = 0;
+    while (i < s.size() && j < t.size()) 
+    {
+        if (s[i] == t[j]) 
+        	++i;
+
+        ++j;
+    }
+    return i == s.size();
+}
+
+
+==============================================
+4Sum II 
+Given four lists A, B, C, D of integer values, compute how many tuples (i, j, k, l) there are such that A[i] + B[j] + C[k] + D[l] is zero.  
+
+我们如果把A和B的两两之和都求出来，在哈希表中建立两数之和跟其出现次数之间的映射，那么我们再遍历C和D中任意两个数之和，我们只要看哈希表存不存在这两数之和的相反数就行了 O(n^2)
+
+int fourSumCount(vector<int>& A, vector<int>& B, vector<int>& C, vector<int>& D) {
+    int res = 0;
+    unordered_map<int, int> m;
+    for (int i = 0; i < A.size(); ++i) 
+    {
+        for (int j = 0; j < B.size(); ++j) 
+        {
+            ++m[A[i] + B[j]];
+        }
+    }
+
+    for (int i = 0; i < C.size(); ++i) 
+    {
+        for (int j = 0; j < D.size(); ++j) 
+        {
+            int target = -1 * (C[i] + D[j]);
+            res += m[target];
+        }
+    }
+    return res;
+}
+
+brutal force (O(n^4))  
+=========================================     
+Number of Islands 岛屿的数量 
+Given a 2d grid map of '1's (land) and '0's (water), count the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+11000
+11000
+00100
+00011
+Answer: 3
+
+这道求岛屿数量的题的本质是求矩阵中连续区域的个数，很容易想到需要用深度优先搜索DFS来解，我们需要建立一个visited数组用来记录某个位置是否被访问过，对于一个为‘1’且未被访问过的位置，我们递归进入其上下左右位置上为‘1’的数，将其visited对应值赋为true，继续进入其所有相连的邻位置，这样可以将这个连通区域所有的数找出来，并将其对应的visited中的值赋true，找完次区域后，我们将结果res自增1，然后我们在继续找下一个为‘1’且未被访问过的位置，以此类推直至遍历完整个原数组即可得到最终结果
+
+
+
+void numIslandsDFS(vector<vector<char> > &grid, vector<vector<bool> > &visited, int x, int y) 
+{
+    if (x < 0 || x >= grid.size()) 
+    	return;
+    if (y < 0 || y >= grid[0].size()) 
+    	return;
+
+    if (grid[x][y] != '1' || visited[x][y]) 
+    	return;
+    
+    visited[x][y] = true;
+    numIslandsDFS(grid, visited, x - 1, y);
+    numIslandsDFS(grid, visited, x + 1, y);
+    numIslandsDFS(grid, visited, x, y - 1);
+    numIslandsDFS(grid, visited, x, y + 1);
+}
+
+
+int numIslands(vector<vector<char> > &grid) 
+{
+    if (grid.empty() || grid[0].empty()) 
+    	return 0;
+
+    int m = grid.size(), n = grid[0].size(), res = 0;
+
+    vector<vector<bool> > visited(m, vector<bool>(n, false));
+
+    for (int i = 0; i < m; ++i) 
+    {
+        for (int j = 0; j < n; ++j) 
+        {
+            if (grid[i][j] == '1' && !visited[i][j]) 
+            {
+                numIslandsDFS(grid, visited, i, j);
+                ++res;
+            }
+        }
+    }
+    return res;
+}
+
+
+=========================================   
+Remove Invalid Parentheses 
+
+Remove the minimum number of invalid parentheses in order to make the input string valid. Return all possible results.
+Note: The input string may contain letters other than the parentheses ( and ).
+
+e.g. 
+"()())()" -> ["()()()", "(())()"]
+"(a)())()" -> ["(a)()()", "(a())()"]
+")(" -> [""]
+
+ vector<string> removeInvalidParentheses(string s) 
+ {
+    vector<string> res;
+    unordered_map<string, int> visited;
+
+    queue<string> q;
+    q.push(s);
+    ++visited[s];
+    bool found = false;
+
+    while (!q.empty()) 
+    {
+        s = q.front(); 
+        q.pop();
+        if (isValid(s)) 
+        {
+            res.push_back(s);
+            found = true;
+        }
+
+        if (found) continue;
+        for (int i = 0; i < s.size(); ++i) 
+        {
+            if (s[i] != '(' && s[i] != ')') 
+            	continue;
+
+            string t = s.substr(0, i) + s.substr(i + 1);  // remove char at i 
+
+            if (visited.find(t) == visited.end()) 
+            {
+                q.push(t);
+                ++visited[t];
+            }
+        }
+    }
+    return res;
+}
+
+
+bool isValid(string t) 
+{
+    int cnt = 0;
+    for (int i = 0; i < t.size(); ++i) 
+    {
+        if (t[i] == '(') 
+        	++cnt;
+
+        if (t[i] == ')' && cnt-- == 0) 
+        	return false;
+    }
+    return cnt == 0;
+}
+
+
+======================================== 
+Course Schedule 
+
+There are a total of n courses you have to take, labeled from 0 to n - 1.
+Some courses may have prerequisites, for example to take course 0 you have to first take course 1, which is expressed as a pair: [0,1]
+Given the total number of courses and a list of prerequisite pairs, is it possible for you to finish all courses?
+
+
+第一条就告诉我们了这道题的本质就是在有向图中检测环。 LeetCode中关于图的题很少，有向图的仅此一道，还有一道关于无向图的题是 Clone Graph 无向图的复制。个人认为图这种数据结构相比于树啊，链表啊什么的要更为复杂一些，尤其是有向图，很麻烦。第二条提示是在讲如何来表示一个有向图，可以用边来表示，边是由两个端点组成的，用两个点来表示边。第三第四条提示揭示了此题有两种解法，DFS和BFS都可以解此题。我们先来看BFS的解法，我们定义二维数组graph来表示这个有向图，一位数组in来表示每个顶点的入度。我们开始先根据输入来建立这个有向图，并将入度数组也初始化好。然后我们定义一个queue变量，将所有入度为0的点放入队列中，然后开始遍历队列，从graph里遍历其连接的点，每到达一个新节点，将其入度减一，如果此时该点入度为0，则放入队列末尾。直到遍历完队列中所有的值，若此时还有节点的入度不为0，则说明环存在，返回false，反之则返回true。
+
+
+solution 1 : BFS 
+bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) 
+{
+        
+    vector<vector<int> > graph(numCourses, vector<int>(0));  // graph(vertexs 数目, 每个vertex所指向的所有vertexs)
+    vector<int> in(numCourses, 0);   // 入度
+
+    for (auto a : prerequisites) 
+    {
+        graph[a.second].push_back(a.first);  // 有向图， a.second 指向 a.first. a.second是prerequisites, a.first 是需要prerequisites的courses.  
+        ++in[a.first];
+    }
+
+    queue<int> q;
+    for (int i = 0; i < numCourses; ++i) 
+    {
+        if (in[i] == 0) 
+        	q.push(i);
+    }
+
+    while (!q.empty()) 
+    {
+        int t = q.front();
+        q.pop();
+
+        for (auto a : graph[t])  
+        {
+            --in[a];   // 所有prerequisites是a的vertexs的度数减一   
+            if (in[a] == 0) 
+            	q.push(a);
+        }
+    }
+
+    for (int i = 0; i < numCourses; ++i) 
+    {
+        if (in[i] != 0) 
+        	return false;
+    }
+
+    return true;
+}
+
+---------------------------------
+
+下面我们来看DFS的解法，也需要建立有向图，还是用二维数组来建立，和BFS不同的是，我们像现在需要一个一维数组visit来记录访问状态，大体思路是，先建立好有向图，然后从第一个门课开始，找其可构成哪门课，暂时将当前课程标记为已访问，然后对新得到的课程调用DFS递归，直到出现新的课程已经访问过了，则返回false，没有冲突的话返回true，然后把标记为已访问的课程改为未访问。
+
+solution 2: DFS .  判断有无cycle, 若之前visit过了则有cycle. 
+bool canFinishDFS(vector<vector<int> > &graph, vector<int> &visit, int i) 
+{
+    if (visit[i] == -1) return false;
+    if (visit[i] == 1) return true;
+    visit[i] = -1;
+
+    for (auto a : graph[i]) 
+    {
+        if (!canFinishDFS(graph, visit, a)) 
+        	return false;
+    }
+    visit[i] = 1;
+    return true;
+}  
+
+
+bool canFinish(int numCourses, vector<pair<int, int>>& prerequisites) 
+{
+
+        
+    vector<vector<int> > graph(numCourses, vector<int>(0));
+    vector<int> visit(numCourses, 0);
+
+    for (auto a : prerequisites) 
+    {
+        graph[a.second].push_back(a.first);
+    }
+
+    for (int i = 0; i < numCourses; ++i) 
+    {
+        if (!canFinishDFS(graph, visit, i)) 
+        	return false;
+    }
+    return true;
+}
+
+==========================================================
+Course Schedule II 
+
+这题是之前那道 Course Schedule 课程清单的扩展，那道题只让我们判断是否能完成所有课程，即检测有向图中是否有环，而这道题我们得找出要上的课程的顺序，即有向图的拓扑排序，这样一来，难度就增加了，但是由于我们有之前那道的基础，而此题正是基于之前解法的基础上稍加修改，我们从queue中每取出一个数组就将其存在结果中，最终若有向图中有环，则结果中元素的个数不等于总课程数，那我们将结果清空即可。
+
+vector<int> findOrder(int numCourses, vector<pair<int, int>>& prerequisites) 
+{
+    vector<int> res;
+    vector<vector<int> > graph(numCourses, vector<int>(0));
+    vector<int> in(numCourses, 0);
+
+    for (auto &a : prerequisites) 
+    {
+        graph[a.second].push_back(a.first);
+        ++in[a.first];
+    }
+
+    queue<int> q;
+    for (int i = 0; i < numCourses; ++i) 
+    {
+        if (in[i] == 0) q.push(i);
+    }
+
+    while (!q.empty()) 
+    {
+        int t = q.front();
+        res.push_back(t);  // different line 
+        q.pop();
+
+        for (auto &a : graph[t]) 
+        {
+            --in[a];
+            if (in[a] == 0) 
+            	q.push(a);
+        }
+    }
+
+    if (res.size() != numCourses) 
+    	res.clear();
+    return res;
+}
+
+
+
+
+=============================================================    
+Nested List Weight Sum 
+
+Given a nested list of integers, return the sum of all integers in the list weighted by their depth.
+Each element is either an integer, or a list -- whose elements may also be integers or other lists.
+Example 1:
+Given the list [[1,1],2,[1,1]], return 10. (four 1 at depth 2, one 2 at depth 1)
+
+Example 2:
+Given the list [1,[4,[6]]], return 27. (one 1 at depth 1, one 4 at depth 2, and one 6 at depth 3; 1 + 4*2 + 6*3 = 27)
+
+
+
+int depthSum(vector<NestedInteger>& nestedList) 
+{
+    int res = 0;
+    for (auto a : nestedList) 
+    {
+        res += getSum(a, 1);
+    }
+    return res;
+}
+
+int getSum(NestedInteger ni, int level) 
+{
+    int res = 0;
+    if (ni.isInteger()) 
+        return level * ni.getInteger();
+    
+    for (auto a : ni.getList()) 
+    {
+        res += getSum(a, level + 1);
+    }
+    return res;
+}
+
+
+solution 2:  much slower than solution 1 
+
+int depthSum(vector<NestedInteger>& nestedList) 
+{
+  return depth(nestedList, 1); 
+}
+
+
+int depth(vector<NestedInteger>& nestedList, int count)
+{
+    int sum = 0; 
+
+    for(int i = 0; i < nestedList.size(); ++i)
+    {
+        if(nestedList[i].isInteger())
+            sum += count*nestedList[i].getInteger(); 
+        else 
+        {
+            // count = count+1;   		// 不知道为什么这两句是错的 
+            // sum += depth(nestedList[i].getList(), count); 
+
+            sum += depth(nestedList[i].getList(), count+1);
+        }
+            
+    }
+    
+    return sum; 
+}
+
+=============================================
+Nested List Weight Sum II  
+
+Different from the previous question where weight is increasing from root to leaf, now the weight is defined from bottom up. i.e., the leaf level integers have weight 1, and the root level integers have the largest weight. 
+e.g. Given the list [[1,1],2,[1,1]], return 8. (four 1 at depth 1, one 2 at depth 2)
+
+
+
+
+
+==============================================    
+
+Longest Increasing Path in a Matrix 矩阵中的最长递增路径  
+
+
+Given an integer matrix, find the length of the longest increasing path.
+
+From each cell, you can either move to four directions: left, right, up or down. You may NOT move diagonally or move outside of the boundary (i.e. wrap-around is not allowed).
+
+Example 1:
+
+nums = [
+  [9,9,4],
+  [6,6,8],
+  [2,1,1]
+]
+
+return 4 
+
+
+这道题给我们一个二维数组，让我们求矩阵中最长的递增路径，规定我们只能上下左右行走，不能走斜线或者是超过了边界。那么这道题的解法要用递归和DP来解，用DP的原因是为了提高效率，避免重复运算。我们需要维护一个二维动态数组dp，其中dp[i][j]表示数组中以(i,j)为起点的最长递增路径的长度，初始将dp数组都赋为0，当我们用递归调用时，遇到某个位置(x, y), 如果dp[x][y]不为0的话，我们直接返回dp[x][y]即可，不需要重复计算。我们需要以数组中每个位置都为起点调用递归来做，比较找出最大值。在以一个位置为起点用DFS搜索时，对其四个相邻位置进行判断，如果相邻位置的值大于上一个位置，则对相邻位置继续调用递归，并更新一个最大值，搜素完成后返回即可，
+
+
+int longestIncreasingPath(vector<vector<int>>& matrix) 
+{
+    if (matrix.empty() || matrix[0].empty()) 
+    	return 0;
+
+    int res = 1, m = matrix.size(), n = matrix[0].size();
+    vector<vector<int>> dp(m, vector<int>(n, 0));   // initialize 2D matrix 
+ 
+    for (int i = 0; i < m; ++i) 
+    {
+        for (int j = 0; j < n; ++j) 
+        {
+            res = max(res, dfs(matrix, dp, i, j));
+        }
+    }
+    return res;
+}
+
+
+int dfs(vector<vector<int> > &matrix, vector<vector<int> > &dp, int i, int j) 
+{
+    if (dp[i][j]) 
+    	return dp[i][j];
+
+    vector<vector<int> > dirs = {{0, -1}, {-1, 0}, {0, 1}, {1, 0}};
+    int mx = 1, m = matrix.size(), n = matrix[0].size();
+
+    for (auto a : dirs) 
+    {
+        int x = i + a[0], y = j + a[1];
+        if (x < 0 || x >= m || y < 0 || y >= n || matrix[x][y] <= matrix[i][j]) 
+        	continue;
+
+        int len = 1 + dfs(matrix, dp, x, y);
+        mx = max(mx, len);
+    }
+    dp[i][j] = mx;
+    return mx;
+}
+
+===========================================  
+Reconstruct Itinerary 重建行程单  
+Given a list of airline tickets represented by pairs of departure and arrival airports [from, to], reconstruct the itinerary in order. All of the tickets belong to a man who departs from JFK. Thus, the itinerary must begin with JFK.
+
+Note:
+
+If there are multiple valid itineraries, you should return the itinerary that has the smallest lexical order when read as a single string. For example, the itinerary ["JFK", "LGA"] has a smaller lexical order than ["JFK", "LGB"].
+All airports are represented by three capital letters (IATA code).
+You may assume all tickets may form at least one valid itinerary.
+ 
+
+Example 1:
+tickets = [["MUC", "LHR"], ["JFK", "MUC"], ["SFO", "SJC"], ["LHR", "SFO"]]
+Return ["JFK", "MUC", "LHR", "SFO", "SJC"].
+
+Example 2:
+tickets = [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]
+Return ["JFK","ATL","JFK","SFO","ATL","SFO"].
+Another possible reconstruction is ["JFK","SFO","ATL","JFK","ATL","SFO"]. But it is larger in lexical order.
+
+这道题给我们一堆飞机票，让我们建立一个行程单，如果有多种方法，取其中字母顺序小的那种方法。这道题的本质是有向图的遍历问题，那么LeetCode关于有向图的题只有两道Course Schedule和Course Schedule II，而那两道是关于有向图的顶点的遍历的，而本题是关于有向图的边的遍历。每张机票都是有向图的一条边，我们需要找出一条经过所有边的路径，那么DFS不是我们的不二选择。先来看递归的结果，我们首先把图建立起来，通过邻接链表来建立。由于题目要求解法按字母顺序小的，那么我们考虑用multiset，可以自动排序。等我们图建立好了以后，从节点JFK开始遍历，只要当前节点映射的multiset里有节点，我们取出这个节点，将其在multiset里删掉，然后继续递归遍历这个节点，由于题目中限定了一定会有解，那么等图中所有的multiset中都没有节点的时候，我们把当前节点存入结果中，然后再一层层回溯回去，将当前节点都存入结果，那么最后我们结果中存的顺序和我们需要的相反的，我们最后再翻转一下即可，
+
+
+vector<string> findItinerary(vector<pair<string, string> > tickets) 
+{
+    vector<string> res;
+    unordered_map<string, multiset<string> > m;
+
+    for (auto a : tickets) 
+    {
+        m[a.first].insert(a.second);  // graph initialization
+    }
+
+    dfs(m, "JFK", res);
+    return vector<string> (res.rbegin(), res.rend());
+}
+
+void dfs(unordered_map<string, multiset<string> > &m, string s, vector<string> &res) 
+{
+    while (m[s].size()) 
+    {
+        string t = *m[s].begin();
+        m[s].erase(m[s].begin());
+        dfs(m, t, res);
+    }
+
+    res.push_back(s);
+}
+
+
+===================================================
+Decode String 
+Given an encoded string, return its decoded string. 
+e.g. 
+s = "3[a]2[bc]", return "aaabcbc".
+s = "3[a2[c]]", return "accaccacc".
+s = "2[abc]3[cd]ef", return "abcabccdcdcdef".
+
+
+string decodeString(string s) 
+{
+    int i = 0;
+    return decode(s, i);
+}
+
+string decode(string s, int& i) 
+{
+    string res = "";
+    int n = s.size();
+    while (i < n && s[i] != ']') 
+    {
+        if (s[i] < '0' || s[i] > '9') 
+        {
+            res += s[i++];
+        } 
+        else 
+        {
+            int cnt = 0;  // cnt counts the number of letters to appear 
+            while (i < n && s[i] >= '0' && s[i] <= '9') 
+            {
+                cnt = cnt * 10 + s[i++] - '0';
+            }
+            ++i;  // 在这跳过[ 
+            string t = decode(s, i);  // dfs here 
+            ++i;  // 跳过]
+
+            while (cnt-- > 0)   // output cnt times of letters 
+            {
+                res += t;
+            }
+        }
+    }
+    return res;
+}
+
+================================================   
+Pacific Atlantic Water Flow 
+
+Given an m x n matrix of non-negative integers representing the height of each unit cell in a continent, the "Pacific ocean" touches the left and top edges of the matrix and the "Atlantic ocean" touches the right and bottom edges.
+Water can only flow in four directions (up, down, left, or right) from a cell to another one with height equal or lower.
+Find the list of grid coordinates where water can flow to both the Pacific and Atlantic ocean
+
+ Pacific ~   ~   ~   ~   ~ 
+       ~  1   2   2   3  (5) *
+       ~  3   2   3  (4) (4) *
+       ~  2   4  (5)  3   1  *
+       ~ (6) (7)  1   4   5  *
+       ~ (5)  1   1   2   4  *
+          *   *   *   *   * Atlantic
+
+
+这道题给了我们一个二维数组，说是数组的左边和上边是太平洋，右边和下边是大西洋，假设水能从高处向低处流，问我们所有能流向两大洋的点的集合。刚开始我们没有理解题意，以为加括号的点是一条路径，连通两大洋的，但是看来看去感觉也不太对，后来终于明白了，是每一个点单独都路径来通向两大洋。那么就是典型的搜索问题，那么我最开始想的是对于每个点来搜索是否能到达边缘，只不过搜索的目标点不在是一个单点，而是所有的边缘点，找这种思路写出的代码无法通过OJ大数据集，那么我们就要想办法来优化我们的代码，优化的方法跟之前那道Surrounded Regions很类似，都是换一个方向考虑问题，既然从每个点像中间扩散会TLE，那么我们从边缘当作起点开始遍历搜索，然后标记能到达的点位true，分别标记出pacific和atlantic能到达的点，那么最终能返回的点就是二者均为true的点。我们可以先用DFS来遍历二维数组
+
+
+
+vector<pair<int, int>> pacificAtlantic(vector<vector<int>>& matrix) 
+{
+    if (matrix.empty() || matrix[0].empty()) 
+    	return {};
+
+    vector<pair<int, int>> res;
+    int m = matrix.size(), n = matrix[0].size();
+    vector<vector<bool>> pacific(m, vector<bool>(n, false));
+    vector<vector<bool>> atlantic(m, vector<bool>(n, false));
+
+    for (int i = 0; i < m; ++i) 
+    {
+        dfs(matrix, pacific, INT_MIN, i, 0);
+        dfs(matrix, atlantic, INT_MIN, i, n - 1);
+    }
+
+    for (int i = 0; i < n; ++i) 
+    {
+        dfs(matrix, pacific, INT_MIN, 0, i);
+        dfs(matrix, atlantic, INT_MIN, m - 1, i);
+    }
+
+    for (int i = 0; i < m; ++i) 
+    {
+        for (int j = 0; j < n; ++j) 
+        {
+            if (pacific[i][j] && atlantic[i][j]) 
+            {
+                res.push_back({i, j});
+            }
+        }
+    }
+    return res;
+}
+
+
+void dfs(vector<vector<int>>& matrix, vector<vector<bool>>& visited, int pre, int i, int j) 
+{
+    int m = matrix.size(), n = matrix[0].size();
+    if (i < 0 || i >= m || j < 0 || j >= n || visited[i][j] || matrix[i][j] < pre) 
+    	return;
+
+    visited[i][j] = true;
+    dfs(matrix, visited, matrix[i][j], i + 1, j);
+    dfs(matrix, visited, matrix[i][j], i - 1, j);
+    dfs(matrix, visited, matrix[i][j], i, j + 1);
+    dfs(matrix, visited, matrix[i][j], i, j - 1);
+}
+
+
+============================================================= 
+Ternary Expression Parser 三元表达式解析器  
+
+Given a string representing arbitrarily nested ternary expressions, calculate the result of the expression. You can always assume that the given expression is valid and only consists of digits 0-9, ?, :, T and F (T and Frepresent True and False respectively). 
+
+Example 1:
+Input: "T?2:3"
+Output: "2"
+Explanation: If true, then result is 2; otherwise result is 3.
+ 
+
+Example 2:
+Input: "F?1:T?4:5"
+Output: "4"
+
+如果有多个三元表达式嵌套的情况出现，那么我们的做法是从右边开始找到第一个问号，然后先处理这个三元表达式，然后再一步一步向左推，这也符合程序是从右向左执行的特点。那么我最先想到的方法是用用一个stack来记录所有问号的位置，然后根据此问号的位置，取出当前的三元表达式，调用一个eval函数来分析得到结果，能这样做的原因是题目中限定了三元表达式每一部分只有一个字符，而且需要分析的三元表达式是合法的，然后我们把分析后的结果和前后两段拼接成一个新的字符串，继续处理之前一个问号，这样当所有问号处理完成后，所剩的一个字符就是答案 
+
+
+string parseTernary(string expression) 
+{
+    string res = expression;
+    stack<int> s;
+    for (int i = 0; i < expression.size(); ++i) 
+    {
+        if (expression[i] == '?') s.push(i);
+    }
+    while (!s.empty()) 
+    {
+        int t = s.top(); 
+        s.pop();
+        res = res.substr(0, t - 1) + eval(res.substr(t - 1, 5)) + res.substr(t + 4);
+    }
+    return res;
+}
+
+string eval(string str) 
+{
+    if (str.size() != 5) 
+    	return "";
+
+    return str[0] == 'T' ? str.substr(2, 1) : str.substr(4);
+}
+
+==========================================   
+
+
+
+
 
 
 
