@@ -2,7 +2,11 @@ vector<int> vec(vec1.size(), 0);  // vec 初始化为 vec1大小，值全为0
  
 
 ==================================
+
+www.cnblogs.com/grandyang/p/4606334.html
 www.geeksforgeeks.org/program-for-nth-fibonacci-number/
+
+想不通: Combination Sum II 组合之和之二; 
 
 
 
@@ -10,6 +14,37 @@ linked list 等号左边的->next 表示指向的意思;  等号右边的->next 
 
 0跟任何数异或都还是那个数
 =======================
+Code snippet
+
+// Replace substring with another substring 
+size_t index = 0;
+while (true) 
+{
+     /* Locate the substring to replace. */
+     index = str.find("abc", index);
+     if (index == std::string::npos) 
+     	break;
+
+     /* Make the replacement. */
+     str.replace(index, 3, "def");
+
+     /* Advance index forward so the next iteration doesn't pick it up as well. */
+     index += 3;
+}
+
+
+  /* reverse the number: e.g. 123 -> 321 */
+while (number != 0)
+{
+    reverse = reverse * 10 + number % 10;
+    number /= 10;
+}
+
+
+
+
+====================================
+
 Merge sort  
 
 
@@ -2960,7 +2995,7 @@ class LRUCache{
 
 
 /////////////////////////////////////////////  
-combination 
+combinations 
 
 Given two integers n and k, return all possible combination of k numbers out of 1, 2, ..., n. 
 solution: 1. 暴力求解n!循环  2. DFS + backtracking.  注意level的初始值由题目决定
@@ -3006,6 +3041,29 @@ class Solution
 };
 
 time complexity O(n!)
+
+
+solution 2: 
+ vector<vector<int>> combine(int n, int k) 
+    {
+        vector<vector<int>> res; 
+        vector<int> out; 
+        combineDFS(n, k, 1, res, out);
+        return res; 
+    }
+    
+    void combineDFS(int n, int k, int level, vector<vector<int>>& res, vector<int>& out)
+    {
+        if(out.size() == k)
+            res.push_back(out); 
+        
+        for(int i = level; i <= n; ++i)
+        {
+            out.push_back(i);
+            combineDFS(n, k, i+1, res, out); 
+            out.pop_back(); 
+        }
+    }
 
 //////////////////////////////////////////
 Combination sum 
@@ -5228,15 +5286,671 @@ string eval(string str)
 }
 
 ==========================================   
+Target Sum 目标和
+
+You are given a list of non-negative integers, a1, a2, ..., an, and a target, S. Now you have 2 symbols + and -. For each integer, you should choose one from + and - as its new symbol.
+
+Find out how many ways to assign symbols to make sum of integers equal to target S. 
+
+Input: nums is [1, 1, 1, 1, 1], S is 3. 
+Output: 5
+Explanation: 
+
+-1+1+1+1+1 = 3
++1-1+1+1+1 = 3
++1+1-1+1+1 = 3
++1+1+1-1+1 = 3
++1+1+1+1-1 = 3
+
+
+solution 1: 
+
+int findTargetSumWays(vector<int>& nums, int S) 
+{
+    int res = 0;
+    helper(nums, S, 0, res);
+    return res;
+}
+
+void helper(vector<int>& nums, int S, int start, int& res) 
+{
+    if (start >= nums.size()) 
+    {
+        if (S == 0) 
+        	++res;
+        return;
+    }
+
+    helper(nums, S - nums[start], start + 1, res);
+    helper(nums, S + nums[start], start + 1, res);
+}
+
+------------------------------------------------- 
+solution 2: 递归方法进行优化，使用dp数组来记录中间值，这样可以避免重复运算 
+
+int findTargetSumWays(vector<int>& nums, int S) 
+{
+    vector<unordered_map<int, int>> dp(nums.size());
+    return helper(nums, S, 0, dp);
+}
+
+int helper(vector<int>& nums, int sum, int start, vector<unordered_map<int, int>>& dp) 
+{
+    if (start == nums.size()) 
+    	return sum == 0;
+
+    if (dp[start].count(sum)) 
+    	return dp[start][sum];
+
+    int cnt1 = helper(nums, sum - nums[start], start + 1, dp);
+    int cnt2 = helper(nums, sum + nums[start], start + 1, dp);
+
+    return dp[start][sum] = cnt1 + cnt2;
+}
+
+====================================================  
+Matchsticks to Square 火柴棍组成正方形 
+
+Input: [1,1,2,2,2]
+Output: true
+
+Explanation: You can form a square with length 2, one side of the square came two sticks with length 1.
+
+Input: [3,3,3,3,4]
+Output: false
+
+Explanation: You cannot find a way to form a square with all the matchsticks.
+
+这道题让我们用数组中的数字来摆出一个正方形。跟之前有道题Partition Equal Subset Sum有点像，那道题问我们能不能将一个数组分成和相等的两个子数组，而这道题实际上是让我们将一个数组分成四个和相等的子数组。我一开始尝试着用那题的解法来做，首先来判断数组之和是否是4的倍数，然后还是找能否分成和相等的两个子数组，但是在遍历的时候加上判断如果数组中某一个数字大于一条边的长度时返回false。最后我们同时检查dp数组中一条边长度位置上的值跟两倍多一条边长度位置上的值是否为true，这种方法不幸TLE了。所以只能上论坛求助各路大神了，发现了可以用优化过的递归来解，递归的方法基本上等于brute force，但是C++版本的直接递归没法通过OJ，而是要先给数组从大到小的顺序排序，这样大的数字先加，如果超过target了，就直接跳过了后面的再次调用递归的操作，效率会提高不少，所以会通过OJ。下面来看代码，我们建立一个长度为4的数组sums来保存每个边的长度和，我们希望每条边都等于target，数组总和的四分之一。然后我们遍历sums中的每条边，我们判断如果加上数组中的当前数字大于target，那么我们跳过，如果没有，我们就加上这个数字，然后对数组中下一个位置调用递归，如果返回为真，我们返回true，否则我们再从sums中对应位置将这个数字减去继续循环
+
+bool makesquare(vector<int>& nums) 
+{
+    if (nums.empty() || nums.size() < 4) 
+    	return false;
+
+    int sum = accumulate(nums.begin(), nums.end(), 0);
+    if (sum % 4 != 0) return false;
+    vector<int> sums(4, 0);
+    sort(nums.rbegin(), nums.rend());
+    return helper(nums, sums, 0, sum / 4);
+}
+
+bool helper(vector<int>& nums, vector<int>& sums, int pos, int target) 
+{
+    if (pos >= nums.size()) 
+    {
+        return sums[0] == target && sums[1] == target && sums[2] == target;
+    }
+
+    for (int i = 0; i < 4; ++i) 
+    {
+        if (sums[i] + nums[pos] > target) 
+        	continue;
+
+        sums[i] += nums[pos];
+        if (helper(nums, sums, pos + 1, target)) 
+        	return true;
+
+        sums[i] -= nums[pos];
+    }
+    return false;
+}
+
+
+===========================================  
+Regular Expression Matching 正则表达式匹配  
+
+
+Implement regular expression matching with support for '.' and '*'.
+
+'.' Matches any single character.
+'*' Matches zero or more of the preceding element.
+
+The matching should cover the entire input string (not partial).
+
+The function prototype should be:
+bool isMatch(const char *s, const char *p)
+
+Some examples:
+isMatch("aa","a") → false
+isMatch("aa","aa") → true
+isMatch("aaa","aa") → false
+isMatch("aa", "a*") → true
+isMatch("aa", ".*") → true
+isMatch("ab", ".*") → true
+isMatch("aab", "c*a*b") → true
+
+
+
+这道求正则表达式匹配的题和那道 Wildcard Matching 通配符匹配的题很类似，不同点在于*的意义不同，在之前那道题中，*表示可以代替任意个数的字符，而这道题中的*表示之前那个字符可以有0个，1个或是多个，就是说，字符串a*b，可以表示b或是aaab，即a的个数任意，这道题的难度要相对之前那一道大一些，分的情况的要复杂一些，需要用递归Recursion来解，大概思路如下：
+
+- 若p为空，若s也为空，返回true，反之返回false
+- 若p的长度为1，若s长度也为1，且相同或是p为'.'则返回true，反之返回false
+- 若p的第二个字符不为*，若此时s为空返回false，否则判断首字符是否匹配，且从各自的第二个字符开始调用递归函数匹配
+- 若p的第二个字符为*，若s不为空且字符匹配，调用递归函数匹配s和去掉前两个字符的p，若匹配返回true，否则s去掉首字母
+- 返回调用递归函数匹配s和去掉前两个字符的p的结果
+
+
+bool isMatch(string s, string p) 
+{
+    if (p.empty()) 
+    	return s.empty();
+
+    if (p.size() == 1) 
+    {
+        return (s.size() == 1 && (s[0] == p[0] || p[0] == '.'));
+    }
+
+    if (p[1] != '*') 
+    {
+        if (s.empty()) 
+        	return false;
+
+        return (s[0] == p[0] || p[0] == '.') && isMatch(s.substr(1), p.substr(1));
+    }
+
+    while (!s.empty() && (s[0] == p[0] || p[0] == '.')) 
+    {
+        if (isMatch(s, p.substr(2))) 
+        	return true;
+
+        s = s.substr(1);
+    }
+    return isMatch(s, p.substr(2));
+}
+
+
+=========================================   
+Generate Parentheses 生成括号
+
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses. For example, given n = 3, a solution set is:
+
+"((()))", "(()())", "(())()", "()(())", "()()()"
+
+在LeetCode中有关括号的题共有三道，除了这一道的另外两道是 Valid Parentheses 验证括号和 Longest Valid Parentheses 最长有效括号，这道题给定一个数字n，让生成共有n个括号的所有正确的形式，对于这种列出所有结果的题首先还是考虑用递归Recursion来解，由于字符串只有左括号和右括号两种字符，而且最终结果必定是左括号3个，右括号3个，所以我们定义两个变量left和right分别表示剩余左右括号的个数，如果在某次递归时，左括号的个数大于右括号的个数，说明此时生成的字符串中右括号的个数大于左括号的个数，即会出现')('这样的非法串，所以这种情况直接返回，不继续处理。如果left和right都为0，则说明此时生成的字符串已有3个左括号和3个右括号，且字符串合法，则存入结果中后返回。如果以上两种情况都不满足，若此时left大于0，则调用递归函数，注意参数的更新，若right大于0，则调用递归函数，同样要更新参数。
+
+solution 1: 
+
+vector<string> generateParenthesis(int n) 
+{
+    vector<string> res;
+    generateParenthesisDFS(n, n, "", res);
+    return res;
+}
+
+void generateParenthesisDFS(int left, int right, string out, vector<string> &res) 
+{
+    if (left > right) 
+    	return;
+
+    if (left == 0 && right == 0) 
+    	res.push_back(out);
+    else 
+    {
+        if (left > 0) 
+        	generateParenthesisDFS(left - 1, right, out + '(', res);
+
+        if (right > 0) 
+        	generateParenthesisDFS(left, right - 1, out + ')', res);
+    }
+}
+
+
+solution 2: 
+
+vector<string> generateParenthesis(int n) 
+{
+    // Write your code here
+    vector<string> res;
+    string out;
+    dfs(n, 0, 0, out, res);
+    return res;
+}
+
+
+void dfs(int n, int left, int right, string &out, vector<string> &res) 
+{
+    if (left < n) 
+    { //Keep 塞左括号
+        out.push_back('(');
+        dfs(n, left + 1, right, out, res);
+        out.pop_back();
+    }
+
+    if (right < left) 
+    { //避免出现右括号多余左括号的情况
+        out.push_back(')');
+        dfs(n, left, right + 1, out, res);
+        out.pop_back();
+    }
+
+    if (out.size() == n * 2)
+        res.push_back(out);
+}
+
+===========================================  
+Gray Code 格雷码 
+
+The gray code is a binary numeral system where two successive values differ in only one bit.
+Given a non-negative integer n representing the total number of bits in the code, print the sequence of gray code. A gray code sequence must begin with 0.
+For example, given n = 2, return [0,1,3,2]. Its gray code sequence is:
+
+00 - 0
+01 - 1
+11 - 3
+10 - 2
+
+
+比如下面这种方法用到了一个set来保存已经产生的结果，我们从0开始，遍历其二进制每一位，对其取反，然后看其是否在set中出现过，如果没有，我们将其加入set和结果res中，然后再对这个数的每一位进行遍历，以此类推就可以找出所有的格雷码了
+
+
+vector<int> grayCode(int n) 
+{
+    vector<int> res;
+    unordered_set<int> s;
+    helper(n, s, 0, res);
+    return res;
+}
+
+void helper(int n, unordered_set<int>& s, int out, vector<int>& res) 
+{
+    if (!s.count(out)) 
+    {
+        s.insert(out);
+        res.push_back(out);
+    }
+
+    for (int i = 0; i < n; ++i) 
+    {
+        int t = out;
+
+        if ((t & (1 << i)) == 0)  // 1 << 0 == 1; 1 << 1 == 2; 1 << 2 == 4; ... 
+        	t |= (1 << i);  // t = t | (1 << i) 
+        else 
+        	t &= ~(1 << i);  // 若t全为1则到这行
+
+        if (s.count(t)) 
+        	continue;
+
+        helper(n, s, t, res);
+        break;
+    }
+}
+
+=======================================  
 
 
 
 
 
+bool exist(vector<vector<char> > &board, string word) 
+{
+    if (word.empty()) 
+        return true;
+
+    if (board.empty() || board[0].empty()) 
+        return false;
+
+    vector<vector<bool> > visited(board.size(), vector<bool>(board[0].size(), false));
+
+    for (int i = 0; i < board.size(); ++i) 
+    {
+        for (int j = 0; j < board[i].size(); ++j) 
+        {
+            if (search(board, word, 0, i, j, visited)) 
+                return true;
+        }
+    }
+    return false;
+}
+
+
+bool search(vector<vector<char> > &board, string word, int idx, int i, int j, vector<vector<bool> > &visited) 
+{
+    if (idx == word.size()) 
+        return true;
+    if (i < 0 || j < 0 || i >= board.size() || j >= board[0].size() || visited[i][j] || board[i][j] != word[idx]) 
+        return false;
+
+    visited[i][j] = true;
+
+    bool res = search(board, word, idx + 1, i - 1, j, visited) 
+             || search(board, word, idx + 1, i + 1, j, visited)
+             || search(board, word, idx + 1, i, j - 1, visited)
+             || search(board, word, idx + 1, i, j + 1, visited);
+
+    visited[i][j] = false;  // 为什么要这一行  
+
+    return res;
+}
+
+
+=================================================    
+Word Search II 
+
+Given a 2D board and a list of words from the dictionary, find all words in the board.
+
+Each word must be constructed from letters of sequentially adjacent cell, where "adjacent" cells are those horizontally or vertically neighboring. The same letter cell may not be used more than once in a word.
+
+For example,
+Given words = ["oath","pea","eat","rain"] and board =
+
+[
+  ['o','a','a','n'],
+  ['e','t','a','e'],
+  ['i','h','k','r'],
+  ['i','f','l','v']
+]
+Return ["eat","oath"].
 
 
 
+struct TrieNode 
+{
+    TrieNode *child[26];
+    string str;
 
+    TrieNode() : str("") 
+    {
+        for (auto &a : child) 
+            a = NULL;
+    }
+};
+
+struct Trie 
+{
+    TrieNode *root;
+    Trie() : root(new TrieNode()) {}
+
+    void insert(string s) 
+    {
+        TrieNode *p = root;
+        for (auto &a : s) 
+        {
+            int i = a - 'a';
+            if (!p->child[i]) 
+                p->child[i] = new TrieNode();
+
+            p = p->child[i];
+        }
+        p->str = s;
+    }
+};
+
+
+vector<string> findWords(vector<vector<char> >& board, vector<string>& words) 
+{
+    vector<string> res;
+    if (words.empty() || board.empty() || board[0].empty()) 
+        return res;
+
+    vector<vector<bool> > visit(board.size(), vector<bool>(board[0].size(), false));
+    Trie T;
+
+    for (auto &a : words) 
+        T.insert(a);
+
+    for (int i = 0; i < board.size(); ++i) 
+    {
+        for (int j = 0; j < board[i].size(); ++j) 
+        {
+            if (T.root->child[board[i][j] - 'a']) 
+            {
+                search(board, T.root->child[board[i][j] - 'a'], i, j, visit, res);
+            }
+        }
+    }
+    return res;
+}
+void search(vector<vector<char> > &board, TrieNode *p, int i, int j, vector<vector<bool> > &visit, vector<string> &res) 
+{ 
+    if (!p->str.empty()) 
+    {
+        res.push_back(p->str);
+        p->str.clear();
+    }
+
+    int d[][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    visit[i][j] = true;
+
+    for (auto &a : d) 
+    {
+        int nx = a[0] + i, ny = a[1] + j;
+        if (nx >= 0 && nx < board.size() && ny >= 0 && ny < board[0].size() && !visit[nx][ny] && p->child[board[nx][ny] - 'a']) 
+        {
+            search(board, p->child[board[nx][ny] - 'a'], nx, ny, visit, res);
+        }
+    }
+    visit[i][j] = false;
+}
+
+
+
+=============================================        
+N-Queens
+
+print all solutions of N queens (another problem: print 1 solution of N queens)
+
+Given an integer n, return all distinct solutions to the n-queens puzzle.
+Each solution contains a distinct board configuration of the n-queens placement, where 'Q' and '.' both indicate a queen and an empty space respectively.
+
+[
+ [".Q..",  // Solution 1
+  "...Q",
+  "Q...",
+  "..Q."],
+
+ ["..Q.",  // Solution 2
+  "Q...",
+  "...Q",
+  ".Q.."]
+]
+
+1) Start in the leftmost column
+2) If all queens are placed
+    return true
+3) Try all rows in the current column.  Do following
+   for every tried row.
+    a) If the queen can be placed safely in this row
+       then mark this [row, column] as part of the 
+       solution and recursively check if placing  
+       queen here leads to a solution.
+    b) If placing queen in [row, column] leads to a
+       solution then return true.
+    c) If placing queen doesnot lead to a solution 
+       then unmark this [row, column] (Backtrack) 
+       and go to step (a) to try other rows.
+3) If all rows have been tried and nothing worked, 
+   return false to trigger backtracking.
+
+
+时间复杂度高了, 需要优化 
+bool isSafe(vector<string> board, int row, int col)
+{
+    int i, j;
+    int N = board.size();
+    /* Check this row on left side */
+    for (i = 0; i < col; i++)
+        if (board[row][i] == 'Q')
+            return false;
+
+    for (i=row, j=col; i>=0 && j>=0; i--, j--)
+        if (board[i][j] == 'Q')
+            return false;
+
+    for (i=row, j=col; j>=0 && i<N; i++, j--)
+        if (board[i][j] == 'Q')
+            return false;
+
+    return true;
+}
+
+
+void solveNQUtil(vector<string> board, int col, vector<vector<string>>& ret)
+{
+    int N = board.size();
+
+    if (col == N )
+    {
+        ret.push_back(board); 
+    }
+
+    for (int i = 0; i < N; i++)
+    {
+
+        if ( isSafe(board, i, col) )
+        {
+            board[i][col] = 'Q';
+
+            solveNQUtil(board, col + 1, ret) ;
+
+            board[i][col] = '.'; // BACKTRACK
+        }
+    }
+
+}
+
+
+vector<vector<string>> solveNQueens(int n) 
+{
+
+    vector<string> board(n, string(n, '.'));  // initialize
+    vector<vector<string>> ret;  // initialize 
+
+    solveNQUtil(board, 0, ret); 
+
+    return ret; 
+}
+
+
+==============================================  
+         
+N-Queens II 
+
+Follow up for N-Queens problem.
+Now, instead outputting board configurations, return the total number of distinct solutions.
+
+----- print one solution 
+
+bool isSafe(vector<string> board, int row, int col)
+{
+    int i, j;
+    int N = board.size();
+    /* Check this row on left side */
+    for (i = 0; i < col; i++)
+        if (board[row][i] == 'Q')
+            return false;
+
+    for (i=row, j=col; i>=0 && j>=0; i--, j--)
+        if (board[i][j] == 'Q')
+            return false;
+
+    for (i=row, j=col; j>=0 && i<N; i++, j--)
+        if (board[i][j] == 'Q')
+            return false;
+
+    return true;
+}
+
+
+void solveNQUtil(vector<string> board, int col, int& total)
+{
+int N = board.size();
+
+if (col == N )
+{
+    // ret.push_back(board);
+    total++; 
+}
+
+for (int i = 0; i < N; i++)
+{
+
+    if ( isSafe(board, i, col) )
+    {
+        board[i][col] = 'Q';
+
+        solveNQUtil(board, col + 1, total) ;
+
+        board[i][col] = '.'; // BACKTRACK
+    }
+}
+
+}
+
+
+int totalNQueens(int n) 
+{
+
+vector<string> board(n, string(n, '.'));  // initialize
+// vector<vector<string>> ret;  // initialize 
+int total = 0;  // 不初始化则total为随机值
+solveNQUtil(board, 0, total); 
+
+return total; 
+}
+
+
+=====================================================    
+Combination Sum II 组合之和之二
+
+Given a collection of candidate numbers (C) and a target number (T), find all unique combinations in C where the candidate numbers sums to T.
+
+Each number in C may only be used once in the combination.
+
+Note:
+
+All numbers (including target) will be positive integers.
+Elements in a combination (a1, a2, … , ak) must be in non-descending order. (ie, a1 ≤ a2 ≤ … ≤ ak).
+The solution set must not contain duplicate combinations.
+ 
+
+For example, given candidate set 10,1,2,7,6,1,5 and target 8, 
+A solution set is: 
+[1, 7] 
+[1, 2, 5] 
+[2, 6] 
+[1, 1, 6] 
+
+ 
+
+这道题跟之前那道 Combination Sum 组合之和 本质没有区别，只需要改动一点点即可，之前那道题给定数组中的数字可以重复使用，而这道题不能重复使用，只需要在之前的基础上修改两个地方即可，首先在递归的for循环里加上if (i > start && num[i] == num[i - 1]) continue; 这样可以防止res中出现重复项，然后就在递归调用combinationSum2DFS里面的参数换成i+1，这样就不会重复使用数组中的数字了
+
+
+vector<vector<int> > combinationSum2(vector<int> &num, int target) 
+{
+    vector<vector<int> > res;
+    vector<int> out;
+    sort(num.begin(), num.end());
+
+    combinationSum2DFS(num, target, 0, out, res);
+
+    return res;
+}
+
+void combinationSum2DFS(vector<int> &num, int target, int start, vector<int> &out, vector<vector<int> > &res) 
+{
+    if (target < 0) 
+        return;
+
+    else if (target == 0) 
+        res.push_back(out);
+    else 
+    {
+        for (int i = start; i < num.size(); ++i) 
+        {
+            if (i > start && num[i] == num[i - 1]) 
+                continue;   // 这一行是防答案有重复 !!!!!!!!!!!!! 理解
+
+            out.push_back(num[i]);
+
+            combinationSum2DFS(num, target - num[i], i + 1, out, res);
+            out.pop_back();
+        }
+    }
+}
+
+=========================================  
 
 
 
