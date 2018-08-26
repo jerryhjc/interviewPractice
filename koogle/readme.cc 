@@ -1,0 +1,109 @@
+dfs, bfs, dp, union find, binary search, 
+
+发现大多数题目还是dfs bfs dp, 二分，sliding window，还有一些实现题
+    （包括 拓扑排序 双指针 位运算 实现数据结构LRU LFU，stack/queue，Trie,外排序, 甚至是数据结构的设计等） 其他题目没怎么碰到。
+    其中dfs bfs dp的题目加起来超过了65%+的算法题  
+
+google follow up: 改进自己的数据结构  
+
+http://www.1point3acres.com/bbs/thread-208578-1-1.html       
+
+/////////////////////////
+
+数组方法: 累加数组和, 从头累加和从尾累加    
+
+
+
+///////////////////////////
+
+
+
+1. 分解问题的角度: fix 某一维度，尝试另一维度上的所有可能
+   a. 可能是array的(i, j)pointers, b. 可能是矩形的长与宽, c. 可能是tree的每一个subtree, d. 可能是情景题的每一对pair...
+2. 求所有解的, 暴力上backtracking吧
+3. 如果问最短/最少的, 先想BFS、DP这对好基友
+4. 如果环相关/重复访问, DFS + visited state雄起
+5. 如果问连通性, 静态靠DFS/BFS, 动态靠Union-Find
+6. 如果有依赖性, 想想Topologic order 和indegree
+7. DAG的万能套路 DFS+memo, 再到DP
+8. 建图的时候想想vertex, edges/neighbors, cost分别是什么。如果出现cycle, 别忘了给vertex增加状态
+9. 树相关, 永远有backtracking 和 pure recursion两条路
+10. 遇到字符串/字典/char board相关的, Trie tree总是可以试试的
+11. Range里求最大/最小/sum等特征值, Segment tree会是不错的选择
+12. Matrix和Array通常都是1. Two Pointers, 2. Sliding Window(fixed & not fixed), 3. DP
+13. DP题型往往是: a. 问你可不可以啊, 数量有多少啊, b. 两个string上match来match去的, c. 1D/2D array 相关, d. 博弈游戏
+14. 破解DAG cycle想想哪个维度是具有单调性的: 常见的steps, directions, paths
+15. Reversed idea非常重要, 可能会帮助你破题: 最长可能是某种最短的反面, 最多可能是某种最少的反面, obstacle的反面是reachable, subarray的反面是array中的剩下元素, left的反面是right。
+16. Look up别忘了HashMap/HashSet, HashMap + DLL是常见hybrid数据结构。
+17. 找规律试试那些旁门左道: 单调Stack/双端Deque
+18. 排序大法总是可以试试的
+19. 时空复杂度: a. backtracking相关, 想想branching factor和height
+                         b. DFS+memo/DP相关, 想想state数量, 以及每个state的cost
+                         c. tree相关, 总是要考虑balanced 和 single linked list的 
+                         d. array/矩阵相关, 先数数你有多少个for loops 
+                         e. binary search application相关, 别忘了check function开销
+                         f. stack/queue/deque相关, 常说的吃进去一次又吐出来一次
+                         g. Java的string是朵奇葩, string concatenation不是免费的
+                         h. 没人知道n是什么, 先告诉别人m，n，k，V，E是什么
+20. 比较不同sol的trade offs: a. Time/Space complexity异同
+                                             b. online/offline算法
+                                             c. pre-computation cost
+                                             d. 不同APIs的call frequency差异会导致不同的时间要求
+                                             e. extension: 是否适用于generic parameters/stream input
+                                             f. 线程安全/large scale
+
+
+                                             
+
+===============================
+大家或许会发现Google的面试并不是大部分来自leetcode原题，所有不是说你使劲刷leetcode，甚至能默写下来的程度就一定能拿到offer.
+然后许多谷歌的面试题，是需要一点思维的，如果想出来，写代码并不是特别难。
+
+
+有一个机器人在二维平面上,开始在(0,0)点，头向北,
+机器人只接受三个指令，G,L,R. G向前走一步, L 左转90度， R右转90度。
+现在给定一个命令序列s,机器人一直重复执行这个序列。
+问能不能在平面上画一个圆，保证机器人会走出这个圆,圆的半径不需要是整数.
+
+输入s,一个String,代表命令序列.
+如果存在这么一个圆，返回”YES”,否则返回”NO”. Waral 博客有更多文章,
+
+例1 s=“GGGR”, 机器人一直在围着一个正方形轨迹走.. From 1point 3acres bbs
+返回YES. 
+
+例2 s=“GGRGGL”, 机器人向着东北方向走向无穷远
+返回NO
+
+solution 1: 
+initDirection = UP
+distanceMoved = getDistance(s)//how far it moved from start point
+if(distanceMoved == 0)//still at start point
+    return true
+else
+    afterDirection = getDirectionAfterMove(s)//the direction it faces after the move
+    return !(afterDirection == initDirection)
+
+solution 2: 
+
+这题纯粹是数学题，跟编程无关啊，解法如下：朝向相同. 
+跑四次命令序列S， 就可以得到答案。每跑完一次命令序列，记录机器人的朝向。加上最开始的朝向，共有五次记录， 必定有两次记录相同，
+不妨设跑完第1次后和跑完第四次后朝向相同， 用 （x_i, y_i) 表示跑完第 i 次后机器人所在位置的坐标。令 x = x_1 - x_4, y= y_1 - y_4. 则能否画圆就看 是否  x=y=0;
+
+
+============================
+
+题目：在电话拨号盘上，按国际象棋的骑士走法/中国象棋的马走法，限定走的步数，问一共有多少种走法？
+
+https://wdxtub.com/interview/14520850400653.html   
+http://www.1point3acres.com/bbs/thread-321797-1-1.html  
+
+
+
+
+
+
+
+
+
+
+
